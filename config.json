@@ -11,7 +11,7 @@
         
         "Q": 1,
         "atpos_lat": [[0,1]],
-        "N_max":5,
+        "N_max":10,
         "S_max":0.5,
         "GS":false,
         "RWA":false,

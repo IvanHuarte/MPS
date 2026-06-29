@@ -3,6 +3,7 @@ import numpy as np
 from tenpy.algorithms.dmrg import TwoSiteDMRGEngine
 
 import pickle
+import argparse
 import os
 import json
 import uuid
@@ -11,6 +12,22 @@ import shutil
 from SpinBosonEnv.GeneralSpinBosonEnv import GeneralSpinBosonEnv
 from SpinBosonEnv.CavityArrayAtom import CavityArrayAtom
 from SpinBosonEnv.Basis import Map2Xcontraction
+
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "-c",
+    "--config",
+    action="append",
+    required=False,
+    help="Parse configuration files in order. Simulation/CM/NN",
+)
+
+args = parser.parse_args()
+
+if args.config is None:
+    args.config = [
+        "/home/ihuarte/Escritorio/Ivan/MPS/config.json"
+    ]
 
 sim_uuid = str(uuid.uuid4())[:8]
 write_folder = f"/home/ihuarte/Escritorio/Ivan/MPS/Results/{sim_uuid}/"
@@ -29,9 +46,9 @@ for k, v in SB_params.items():
 
 # Run in parameters
 
-wc_list = [0.5, 1.0, 5.0, 10.0, 50.0, 100.0, 500.0, 1000.0]
-Nk_list = [101, 101, 101, 101, 301, 501, 2501, 5001]
-g_list = np.arange(0.01, 1.5, 0.05)
+wc_list = [0.5, 1.0, 5.0, 10.0, 50.0, 100.0]#, 500.0, 1000.0]
+Nk_list = [101, 101, 101, 101, 301, 501]#, 2501, 5001]
+g_list = np.arange(0.01, 1.5, 0.02)
 
 for wc, Nk in zip(wc_list, Nk_list):
     SB_params["wc"] = wc
@@ -88,9 +105,9 @@ for wc, Nk in zip(wc_list, Nk_list):
         C=psi_gr.correlation_function(caa.OperatorChain('Bd'),caa.OperatorChain('B'),caa.bs_idx,caa.bs_idx)
         Nx=Map2Xcontraction(C,env_SB.basis)
 
-        np.savetxt(write_folder + 'GroundState_wc_%.3f_g_%.3f_NoccMap.txt'%(wc, g), N)
-        np.savetxt(write_folder + 'GroundState_wc_%.3f_g_%.3f_NoccX.txt'%(wc, g), Nx)
+        np.savetxt(write_folder + 'GroundState_wc_%.4f_g_%.4f_NoccMap.txt'%(wc, g), N)
+        np.savetxt(write_folder + 'GroundState_wc_%.4f_g_%.4f_NoccX.txt'%(wc, g), Nx)
 
-    with open(write_folder + 'Main_results_wc_%.3f.pkl', 'wb') as f:
+    with open(write_folder + 'Main_results_wc_%.4f_Nk_%.4f.pkl'%(wc, Nk), 'wb') as f:
         pickle.dump(main_results, f)
 
