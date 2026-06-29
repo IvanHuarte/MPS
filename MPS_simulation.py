@@ -33,8 +33,9 @@ wc_list = [0.5, 1.0, 5.0, 10.0, 50.0, 100.0, 500.0, 1000.0]
 Nk_list = [101, 101, 101, 101, 301, 501, 2501, 5001]
 g_list = np.arange(0.01, 1.5, 0.05)
 
-for wc in zip(wc_list, Nk_list):
+for wc, Nk in zip(wc_list, Nk_list):
     SB_params["wc"] = wc
+    SB_params["Nk"] = Nk
 
     for i, g in enumerate(g_list):
         SB_params["g"] = g
@@ -65,8 +66,8 @@ for wc in zip(wc_list, Nk_list):
         E_gr, psi_gr = eng.run()
 
         """ Save results """
-        # Save as: w0 | wc | g | E_gr | Sx | Sy | Sz | S_bond | 
-        main_results= np.zeros((len(g_list), 8))
+        # Save as: w0 | wc | Nk | g | E_gr | Sx | Sy | Sz | S_bond | 
+        main_results= np.zeros((len(g_list), 9))
 
         Sz=psi_gr.expectation_value('Sz',caa.atpos_idx)
         Sx=psi_gr.expectation_value('Sx',caa.atpos_idx)
@@ -79,9 +80,9 @@ for wc in zip(wc_list, Nk_list):
         print('Sy',Sy)
         print('Entanglement_S:',Sbond,'\n\n')
 
-        main_results[i][0] = SB_params["w0"] ; main_results[i][1] = wc ; main_results[i][2] = g
-        main_results[i][3] = E_gr ; main_results[i][4] = Sz[0] ; main_results[i][5] = Sx[0] 
-        main_results[i][6] = Sy[0] ; main_results[i][7] = Sbond
+        main_results[i][0] = SB_params["w0"] ; main_results[i][1] = wc ; main_results[i][2] = Nk
+        main_results[i][3] = g ; main_results[i][4] = E_gr ; main_results[i][5] = Sz[0]
+        main_results[i][6] = Sx[0] ; main_results[i][7] = Sy[0] ; main_results[i][8] = Sbond
 
         N = psi_gr.expectation_value(caa.OperatorChain("N"), caa.bs_idx)
         C=psi_gr.correlation_function(caa.OperatorChain('Bd'),caa.OperatorChain('B'),caa.bs_idx,caa.bs_idx)
