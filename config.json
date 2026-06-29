@@ -1,0 +1,31 @@
+{
+    "SB_params": {
+        "wc": 50.0,
+        "w0": 1.0,
+        "Nk" : 800,
+        "g" : 1.5,
+        "delta" : 1.0
+    },
+
+    "model_params" : {
+        
+        "Q": 1,
+        "atpos_lat": [[0,1]],
+        "N_max":5,
+        "S_max":0.5,
+        "GS":false,
+        "RWA":false,
+        "bc_mps":"finite",
+        "bc":"open",
+        "plot_lattice": false
+    },
+
+    "DMRG_options":{
+        "min_sweeps":10,
+        "max_sweeps":50,
+        "trunc_params": {
+            "chi_max": 100, 
+            "svd_min": 1e-12
+        }
+}
+}
