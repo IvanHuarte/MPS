@@ -105,6 +105,7 @@ class CavityArrayAtom:
         """BONDS AND MPO"""
 
         self.H_MPO = self.Cm.calc_H_MPO(tol_zero=1e-10)
+        assert self.H_MPO.is_equal(self.H_MPO.dagger()), f"H_MPO is not hermitian"
         if not self.GS:
             self.H_bond = self.Cm.calc_H_bond(tol_zero=1e-10)
 
@@ -169,7 +170,7 @@ class CavityArrayAtom:
             for i in range(self.L - 1):
                 # print(i)
                 self.Cm.add_local_term(
-                    self.J[i],
+                    -self.J[i],
                     [(B[i], self.lat.order[i]), (Bd[i + 1], self.lat.order[i + 1])],
                     plus_hc=True,
                 )  # horizontal #
@@ -189,7 +190,7 @@ class CavityArrayAtom:
             # HOPPING
             for i in range(self.L - 1):
                 self.Cm.add_local_term(
-                    self.J[i], [("B", [i, 0]), ("Bd", [i + 1, 0])], plus_hc=True
+                    -self.J[i], [("B", [i, 0]), ("Bd", [i + 1, 0])], plus_hc=True
                 )
             # CAVITY-ATOM
             for at in self.atpos_lat:
