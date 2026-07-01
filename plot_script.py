@@ -16,7 +16,7 @@ parser.add_argument(
 args = parser.parse_args()
 directory = args.directory
 
-files = glob.glob("/home/ihuarte/Escritorio/Ivan/MPS/Results/**/*.pkl", recursive=True)
+files = glob.glob(f"{directory}/**/*.pkl", recursive=True)
 
 for file in files:
     print(f"\n\nFile:{file}")

@@ -44,9 +44,12 @@ for k, v in SB_params.items():
 
 # Run in parameters
 
-wc_list = [0.5, 1.0, 5.0, 10.0, 50.0, 100.0]  # , 500.0, 1000.0]
-Nk_list = [101, 101, 101, 101, 301, 501]  # , 2501, 5001]
-g_list = np.arange(0.01, 1.5, 0.1)
+# wc_list = [0.5, 1.0, 5.0, 10.0, 50.0, 100.0]  # , 500.0, 1000.0]
+# Nk_list = [101, 101, 101, 101, 301, 501]  # , 2501, 5001]
+wc_list = [10.0]  # , 500.0, 1000.0]
+Nk_list = [201]  # , 2501, 5001]
+
+g_list = np.arange(0.01, 2.11, 0.1)
 
 for wc, Nk in zip(wc_list, Nk_list):
     SB_params["wc"] = wc

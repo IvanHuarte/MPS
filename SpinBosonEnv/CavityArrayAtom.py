@@ -59,13 +59,13 @@ class CavityArrayAtom:
         if self.GS:
             self.lat = IrregularLattice(
                 self.lat,
-                add=([at for at in self.atpos_lat], [None for i in range(self.Q)]),
+                add=([at for at in self.atpos_lat], [None for _ in range(self.Q)]),
                 add_unit_cell=[self.gs],
             )
         else:
             self.lat = IrregularLattice(
                 self.lat,
-                add=([at for at in self.atpos_lat], [None for i in range(self.Q)]),
+                add=([at for at in self.atpos_lat], [None for _ in range(self.Q)]),
                 add_unit_cell=[self.sp],
             )
         self.lat.unit_cell_positions = np.array([[0.0], [-0.5]])
@@ -105,7 +105,7 @@ class CavityArrayAtom:
         """BONDS AND MPO"""
 
         self.H_MPO = self.Cm.calc_H_MPO(tol_zero=1e-10)
-        assert self.H_MPO.is_equal(self.H_MPO.dagger()), f"H_MPO is not hermitian"
+        assert self.H_MPO.is_equal(self.H_MPO.dagger()), "H_MPO is not hermitian"
         if not self.GS:
             self.H_bond = self.Cm.calc_H_bond(tol_zero=1e-10)
 
@@ -195,7 +195,7 @@ class CavityArrayAtom:
             # CAVITY-ATOM
             for at in self.atpos_lat:
                 # Atom Energy
-                self.Cm.add_local_term(self.delta/2, [("Sz", at)])
+                self.Cm.add_local_term(self.delta, [("Sz", at)])
                 # Atom coupling
                 self.Cm.add_local_term(
                     self.g, [("B", [at[0], 0]), ("Sp", at)], plus_hc=True
