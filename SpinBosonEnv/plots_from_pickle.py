@@ -120,6 +120,7 @@ def plot_from_pickle(pickle_path):
 
     fig4, ax4 = plt.subplots(3, 1, figsize=[6, 12])
     ax4[0].set_title(r"$n^\star=%.2f$" % (nprime), fontsize=15)
+    ax4[2].set_ylim(-0.51, 0.01)
 
     ax4[0].set_ylabel(r"$\langle S_x \rangle_{GS}$", fontsize=18)
     ax4[1].set_ylabel(r"$\langle S_y \rangle_{GS}$", fontsize=18)
