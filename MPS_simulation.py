@@ -53,7 +53,7 @@ shutil.copy("/home/ihuarte/Escritorio/Ivan/MPS/config.json", write_folder)
 wc_list = [10.0, 50.0, 100.0]
 Nk_list = [201, 301, 601]  # , 2501, 5001]
 
-g_list = np.arange(0.0, 1.85, 0.05)
+g_list = np.arange(0.0, 2.05, 0.05)
 
 for wc, Nk in zip(wc_list, Nk_list):
     SB_params["wc"] = wc
