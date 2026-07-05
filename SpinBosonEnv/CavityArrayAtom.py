@@ -170,7 +170,7 @@ class CavityArrayAtom:
             for i in range(self.L - 1):
                 # print(i)
                 self.Cm.add_local_term(
-                    -self.J[i],
+                    self.J[i],
                     [(B[i], self.lat.order[i]), (Bd[i + 1], self.lat.order[i + 1])],
                     plus_hc=True,
                 )  # horizontal #
@@ -190,7 +190,7 @@ class CavityArrayAtom:
             # HOPPING
             for i in range(self.L - 1):
                 self.Cm.add_local_term(
-                    -self.J[i], [("B", [i, 0]), ("Bd", [i + 1, 0])], plus_hc=True
+                    self.J[i], [("B", [i, 0]), ("Bd", [i + 1, 0])], plus_hc=True
                 )
             # CAVITY-ATOM
             for at in self.atpos_lat:
