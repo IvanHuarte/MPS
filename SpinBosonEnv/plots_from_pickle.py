@@ -5,9 +5,11 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import matplotlib.transforms as transforms
 import numpy as np
+import scipy
+from scipy.special import lambertw
 
 
-def plot_from_pickle(pickle_path):
+def plot_from_pickle(pickle_path, plot_field=True):
 
     sim_label = Path(pickle_path).name.split(".pkl")[0].split("Main_results_")[1]
     new_folder = "Figures_" + sim_label
@@ -64,8 +66,14 @@ def plot_from_pickle(pickle_path):
             / (2 * np.pi * w0**2 * nprime**2)
             * (np.exp(-2 * n_values / nprime) / n_values**3)
         )
+
         Nteo = np.concatenate([Nteo_1[1 : int(nprime)], Nteo_2[int(nprime) :]])
-        ax1.plot(range(1, len(n_values)), Nteo, color=cmap[i])
+        Nteo = (
+            g**2
+            / (np.pi**2 * w0**2 * nprime**2)
+            * (scipy.special.k1(n_values / nprime) / n_values) ** 2
+        )
+        ax1.plot(range(0, len(n_values)), Nteo, color=cmap[i])
 
         # MPS RESULTS
         ax1.plot(
@@ -132,6 +140,33 @@ def plot_from_pickle(pickle_path):
     ax4[0].plot(gvals, Sx, color="r")
     ax4[1].plot(gvals, Sy, color="cyan")
     ax4[2].plot(gvals, Sz, color="purple")
+
+    def wk_pos(k, ω0, ωc):
+        return ω0 * ωc / np.sqrt(ω0**2 + 2 * ωc**2 * (1 - np.cos(k)))
+
+    def I3_numeric(ω0, ωc, Nk=200000):
+        k = np.linspace(0, np.pi, Nk)
+        wk = wk_pos(k, ω0, ωc)
+        return np.trapezoid(1 / wk**3, k)
+
+    def deltar_lambert(delta, g0, ω0, ωc, I3):
+        # if g0 == 0:
+        #     return delta
+
+        A0 = 2 * g0**2 * (1 / ωc**2 + 2 / ω0**2)
+        B = (4 * g0**2 / np.pi) * I3
+        z = -B * delta * np.exp(-A0)
+
+        return np.real(-(1 / B) * lambertw(z))
+
+    A = 2 * g**2 * (1 / wc**2 + 2 / w0**2)
+    B = I3_numeric(w0, wc)
+    W0 = deltar_lambert(1.0, gvals, w0, wc, B)
+    Szteo = (1 / B) * W0
+
+    ax4[2].plot(
+        gvals, Szteo, color="k", ls="--", label=r"$\langle S_z \rangle_{GS}^{teo}$"
+    )
 
     ax4[0].grid()
     ax4[1].grid()

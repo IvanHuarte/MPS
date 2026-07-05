@@ -27,10 +27,6 @@ args = parser.parse_args()
 if args.config is None:
     args.config = ["/home/ihuarte/Escritorio/Ivan/MPS/config.json"]
 
-sim_uuid = str(uuid.uuid4())[:8]
-write_folder = f"/home/ihuarte/Escritorio/Ivan/MPS/Results/{sim_uuid}/"
-os.makedirs(write_folder, exist_ok=True)
-shutil.copy("/home/ihuarte/Escritorio/Ivan/MPS/config.json", write_folder)
 
 with open("/home/ihuarte/Escritorio/Ivan/MPS/config.json", "r") as f:
     config = json.load(f)
@@ -42,20 +38,29 @@ DMRG_options = config["DMRG_options"]
 for k, v in SB_params.items():
     SB_params[k] = np.pi if v == "pi" else v
 
+
+# Create simulation folder
+sim_uuid = str(uuid.uuid4())[:8]
+write_folder = f"/home/ihuarte/Escritorio/Ivan/MPS/Results/{SB_params["ohmic_model"]}/{sim_uuid}/"
+os.makedirs(write_folder, exist_ok=True)
+shutil.copy("/home/ihuarte/Escritorio/Ivan/MPS/config.json", write_folder)
+
+
 # Run in parameters
 
 # wc_list = [0.5, 1.0, 5.0, 10.0, 50.0, 100.0]  # , 500.0, 1000.0]
 # Nk_list = [101, 101, 101, 101, 301, 501]  # , 2501, 5001]
-wc_list = [10.0]  # , 500.0, 1000.0]
-Nk_list = [201]  # , 2501, 5001]
+# wc_list = [10.0]  # , 500.0, 1000.0]
+Nk_list = [301]  # , 2501, 5001]
+wc_list = Nk_list
 
-g_list = np.arange(0.01, 2.11, 0.1)
+g_list = np.arange(0.0, 1.85, 0.05)
 
 for wc, Nk in zip(wc_list, Nk_list):
     SB_params["wc"] = wc
     SB_params["Nk"] = Nk
 
-    main_results = np.zeros((len(g_list), 9))
+    main_results = np.zeros((len(g_list), 10))
 
     for i, g in enumerate(g_list):
         SB_params["g"] = g
@@ -86,7 +91,7 @@ for wc, Nk in zip(wc_list, Nk_list):
         E_gr, psi_gr = eng.run()
 
         """ Save results """
-        # Save as: w0 | wc | Nk | g | E_gr | Sx | Sy | Sz | S_bond |
+        # Save as: w0 | wc | Nk | g | E_gr | Sx | Sy | Sz | S_bond | alpha
 
         Sz = psi_gr.expectation_value("Sz", caa.atpos_idx)
         Sx = psi_gr.expectation_value("Sx", caa.atpos_idx)
@@ -108,15 +113,16 @@ for wc, Nk in zip(wc_list, Nk_list):
         main_results[i][6] = Sx[0]
         main_results[i][7] = Sy[0]
         main_results[i][8] = Sbond
+        main_results[i][9] = env_SB.alpha
 
-        N = psi_gr.expectation_value(caa.OperatorChain("N"), caa.bs_idx)
-        C = psi_gr.correlation_function(
-            caa.OperatorChain("Bd"), caa.OperatorChain("B"), caa.bs_idx, caa.bs_idx
-        )
-        Nx = Map2Xcontraction(C, env_SB.basis)
+        # N = psi_gr.expectation_value(caa.OperatorChain("N"), caa.bs_idx)
+        # C = psi_gr.correlation_function(
+        #     caa.OperatorChain("Bd"), caa.OperatorChain("B"), caa.bs_idx, caa.bs_idx
+        # )
+        # Nx = Map2Xcontraction(C, env_SB.basis)
 
-        np.savetxt(write_folder + "GroundState_wc_%.4f_g_%.4f_NoccMap.txt" % (wc, g), N)
-        np.savetxt(write_folder + "GroundState_wc_%.4f_g_%.4f_NoccX.txt" % (wc, g), Nx)
+        # np.savetxt(write_folder + "GroundState_wc_%.4f_g_%.4f_NoccMap.txt" % (wc, g), N)
+        # np.savetxt(write_folder + "GroundState_wc_%.4f_g_%.4f_NoccX.txt" % (wc, g), Nx)
 
     with open(write_folder + "Main_results_wc_%.4f_Nk_%.4f.pkl" % (wc, Nk), "wb") as f:
         pickle.dump(main_results, f)

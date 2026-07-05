@@ -1,6 +1,8 @@
 import numpy as np
 import scipy.sparse as sp
 
+from SpinBosonEnv.OhmicModels import OhmicModel, SubSubOhmicModel
+
 
 class GeneralSpinBosonEnv:
     def __init__(self, SB_params):
@@ -9,9 +11,17 @@ class GeneralSpinBosonEnv:
         # wk = Distribution of mode frequencies (degeneracies allowed)
         # gk = Coupling of the system to each mode
         #
+        
+        """MODELO OHMICO"""
+
+        if SB_params["ohmic_model"] == "Ohmic":
+            ohmic_model = OhmicModel
+        elif SB_params["ohmic_model"] == "SubSubOhmic":
+            ohmic_model = SubSubOhmicModel
 
         """PARAMETROS DEL ENTORNO SPIN-BOSON"""
-        self.k, self.wk, self.gk = self.SubSubOhmicModel(
+
+        self.k, self.wk, self.gk, self.alpha = ohmic_model(
             SB_params["Nk"],
             SB_params["wc"],
             SB_params["w0"],
@@ -49,14 +59,7 @@ class GeneralSpinBosonEnv:
 
         self.Hk = Hk
 
-    def SubSubOhmicModel(self, Nk, wc, w0, g):
 
-        k = np.linspace(-np.pi, np.pi, Nk)
-        wk = w0 * wc / np.sqrt(w0**2 + 2 * wc**2 * (1 - np.cos(k)))
-        gk = np.array([g / np.sqrt(Nk)])
-        gk = np.broadcast_to(gk, (Nk,))
-
-        return (k, wk, gk)
 
     def Hmapping(self, wks, gks, tol=1e-10):
         """

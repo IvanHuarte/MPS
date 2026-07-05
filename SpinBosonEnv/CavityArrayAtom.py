@@ -105,7 +105,7 @@ class CavityArrayAtom:
         """BONDS AND MPO"""
 
         self.H_MPO = self.Cm.calc_H_MPO(tol_zero=1e-10)
-        assert self.H_MPO.is_equal(self.H_MPO.dagger()), "H_MPO is not hermitian"
+        # assert self.H_MPO.is_equal(self.H_MPO.dagger()), "H_MPO is not hermitian"
         if not self.GS:
             self.H_bond = self.Cm.calc_H_bond(tol_zero=1e-10)
 

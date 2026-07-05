@@ -1,5 +1,6 @@
 {
     "SB_params": {
+        "ohmic_model": "Ohmic",
         "wc": 50.0,
         "w0": 1.0,
         "Nk" : 800,
