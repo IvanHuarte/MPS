@@ -52,7 +52,12 @@ shutil.copy("/home/ihuarte/Escritorio/Ivan/MPS/config.json", write_folder)
 # Nk_list = [101, 101, 101, 101, 301, 501]  # , 2501, 5001]
 # wc_list = [10.0]  # , 500.0, 1000.0]
 Nk_list = [301]  # , 2501, 5001]
-wc_list = Nk_list
+
+delta = 1.0
+SB_params["delta"] = delta
+lambda0 = 2 * np.pi / delta
+L = lambda0 * 10
+wc_list = [nk  / L for nk in Nk_list]
 
 g_list = np.arange(0.0, 1.85, 0.05)
 
@@ -74,6 +79,7 @@ for wc, Nk in zip(wc_list, Nk_list):
         env_SB = GeneralSpinBosonEnv(SB_params)
         print(f"Hk: {env_SB.Hk.shape}")
         print(f"Hmap: {env_SB.Hmap.shape}")
+        print(f"gk: \n{env_SB.gk}")
 
         # Tenpy init
         model_params["L"] = len(env_SB.wlist)

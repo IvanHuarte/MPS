@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.sparse as sp
 
-from SpinBosonEnv.OhmicModels import OhmicModel, SubSubOhmicModel
+from SpinBosonEnv.OhmicModels import OhmicModel, SubSubOhmicModel, TFMOhmicModel
 
 
 class GeneralSpinBosonEnv:
@@ -18,6 +18,8 @@ class GeneralSpinBosonEnv:
             ohmic_model = OhmicModel
         elif SB_params["ohmic_model"] == "SubSubOhmic":
             ohmic_model = SubSubOhmicModel
+        elif SB_params["ohmic_model"] == "TFM":
+            ohmic_model = TFMOhmicModel
 
         """PARAMETROS DEL ENTORNO SPIN-BOSON"""
 

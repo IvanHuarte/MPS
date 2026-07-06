@@ -50,12 +50,18 @@ shutil.copy("/home/ihuarte/Escritorio/Ivan/MPS/config.json", write_folder)
 
 # wc_list = [0.5, 1.0, 5.0, 10.0, 50.0, 100.0]  # , 500.0, 1000.0]
 # Nk_list = [101, 101, 101, 101, 301, 501]  # , 2501, 5001]
-wc_list = [10.0, 50.0, 100.0]
-Nk_list = [201, 301, 601]  # , 2501, 5001]
+w0 = SB_params["w0"]
+wc = SB_params["wc"]
+Nk = SB_params["Nk"] 
+
+w_min = w0 * wc / np.sqrt(w0**2 + 4 * wc**2)
+
+lamda_list = [0.3, 0.45, 0.48, 0.49, w_min, 0.5, 0.51, 0.55, 0.7, 0.8, 0.9]
+lamda_list = [45, 48, 49, 49.5, wc, 50.5, 51, 55]
 
 g_list = np.arange(0.0, 2.05, 0.05)
 
-for wc, Nk in zip(wc_list, Nk_list):
+for lamda in lamda_list:
     SB_params["wc"] = wc
     SB_params["Nk"] = Nk
 
@@ -114,14 +120,14 @@ for wc, Nk in zip(wc_list, Nk_list):
         main_results[i][8] = Sbond
         main_results[i][9] = env_SB.alpha
 
-        N = psi_gr.expectation_value(caa.OperatorChain("N"), caa.bs_idx)
-        C = psi_gr.correlation_function(
-            caa.OperatorChain("Bd"), caa.OperatorChain("B"), caa.bs_idx, caa.bs_idx
-        )
-        Nx = Map2Xcontraction(C, env_SB.basis)
+        # N = psi_gr.expectation_value(caa.OperatorChain("N"), caa.bs_idx)
+        # C = psi_gr.correlation_function(
+        #     caa.OperatorChain("Bd"), caa.OperatorChain("B"), caa.bs_idx, caa.bs_idx
+        # )
+        # Nx = Map2Xcontraction(C, env_SB.basis)
 
-        np.savetxt(write_folder + "GroundState_wc_%.4f_g_%.4f_NoccMap.txt" % (wc, g), N)
-        np.savetxt(write_folder + "GroundState_wc_%.4f_g_%.4f_NoccX.txt" % (wc, g), Nx)
+        # np.savetxt(write_folder + "GroundState_wc_%.4f_g_%.4f_delta_%.4f_NoccMap.txt" % (wc, g, SB_params["delta"]), N)
+        # np.savetxt(write_folder + "GroundState_wc_%.4f_g_%.4f_delta_%.4f_NoccX.txt" % (wc, g, SB_params["delta"]), Nx)
 
-    with open(write_folder + "Main_results_wc_%.4f_Nk_%.4f.pkl" % (wc, Nk), "wb") as f:
+    with open(write_folder + "Main_results_wc_%.4f_Nk_%.4f_delta_%.4f.pkl" % (wc, Nk, SB_params["delta"]), "wb") as f:
         pickle.dump(main_results, f)
