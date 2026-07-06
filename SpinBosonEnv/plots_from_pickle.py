@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 import matplotlib.transforms as transforms
 import numpy as np
 import scipy
-from scipy.special import lambertw
 
 
 def plot_from_pickle(pickle_path, plot_field=True):
@@ -26,27 +25,28 @@ def plot_from_pickle(pickle_path, plot_field=True):
     w0 = int(data[:, 0][0])
     wc = int(data[:, 1][0])
     Nk = int(data[:, 2][0])
-    gvals = data[:, 3]
+    gvals = data[:, 3][1::5]
 
     nprime = wc / w0
 
     if plot_field:
 
-        fig1, ax1 = plt.subplots(figsize=[12, 8])
+        fig1, ax1 = plt.subplots(figsize=[8, 8])
         ax1.set_title(
             r"$Occupation\;decayment \quad (n^\star=%.2f)$" % (nprime), fontsize=18
         )
         ax1.set_xlabel(r"$n$", fontsize=18)
         ax1.set_ylabel(r"$\langle a_n^\dagger a_n \rangle_{GS}$", fontsize=18)
-        ax1.set_ylim(1e-18, 1e1)
-        ax1.set_xlim(9e-1, Nk // 2 + 2)
+        ax1.set_ylim(1e-20, 1e1)
+        ax1.set_xlim(1 / nprime - 0.001, 3)
 
-        ax1.vlines(nprime, 1e-18, 1e1, color="grey", ls="--")
         ax1.text(
-            nprime + 1,
+            1,
             0.1,
             r"$n^\star = \frac{\omega_c}{\omega_0}$",
-            transform=transforms.blended_transform_factory(ax1.transData, ax1.transAxes),
+            transform=transforms.blended_transform_factory(
+                ax1.transData, ax1.transAxes
+            ),
             fontsize=12,
         )
         cmap = plt.colormaps["viridis"](np.linspace(0, 1, len(gvals)))
@@ -60,26 +60,16 @@ def plot_from_pickle(pickle_path, plot_field=True):
             n_values = np.arange(len(Nxhalf))
 
             # TEORIC
-            # n < nprime
-            Nteo_1 = g**2 / (np.pi**2 * w0**2 * nprime**2) * (1 / n_values**4)
-            # n > nprime
-            Nteo_2 = (
-                g**2
-                / (2 * np.pi * w0**2 * nprime**2)
-                * (np.exp(-2 * n_values / nprime) / n_values**3)
-            )
-
-            Nteo = np.concatenate([Nteo_1[1 : int(nprime)], Nteo_2[int(nprime) :]])
             Nteo = (
                 g**2
                 / (np.pi**2 * w0**2 * nprime**2)
                 * (scipy.special.k1(n_values / nprime) / n_values) ** 2
             )
-            ax1.plot(range(0, len(n_values)), Nteo, color=cmap[i])
+            ax1.plot(np.arange(0, len(n_values)) / nprime, Nteo, color=cmap[i])
 
             # MPS RESULTS
             ax1.plot(
-                range(len(Nxhalf)),
+                np.arange(len(Nxhalf)) / nprime,
                 Nxhalf,
                 color=cmap[i],
                 marker="o",
@@ -88,6 +78,7 @@ def plot_from_pickle(pickle_path, plot_field=True):
                 label=r"$g=%.2f$" % g,
             )
 
+        ax1.vlines(1, 1e-18, 1e1, color="grey", ls="--")
         ax1.legend()
         ax1.set_yscale("log")
         ax1.set_xscale("log")
@@ -125,23 +116,33 @@ def plot_from_pickle(pickle_path, plot_field=True):
     # SPIN OBSERVABLES
     gvals = data[:, 3]
     Sz = data[:, 5]
-    Sx = data[:, 6]
-    Sy = data[:, 7]
+    # Sx = data[:, 6]
+    # Sy = data[:, 7]
 
-    fig4, ax4 = plt.subplots(3, 1, figsize=[6, 12])
-    ax4[0].set_title(r"$n^\star=%.2f$" % (nprime), fontsize=15)
-    ax4[2].set_ylim(-0.51, 0.01)
+    fig4, ax4 = plt.subplots(1, 1, figsize=[10, 8])
+    ax4.set_title(r"$n^\star=%.2f$" % (nprime), fontsize=15)
+    # ax4.set_ylim(-0.51, 0.01)
 
-    ax4[0].set_ylabel(r"$\langle S_x \rangle_{GS}$", fontsize=18)
-    ax4[1].set_ylabel(r"$\langle S_y \rangle_{GS}$", fontsize=18)
-    ax4[2].set_ylabel(r"$\langle S_z \rangle_{GS}$", fontsize=18)
-    ax4[0].set_xticklabels([])
-    ax4[1].set_xticklabels([])
-    ax4[2].set_xlabel(r"$g$", fontsize=18)
+    # ax4[0].set_ylabel(r"$\langle S_x \rangle_{GS}$", fontsize=18)
+    # ax4[1].set_ylabel(r"$\langle S_y \rangle_{GS}$", fontsize=18)
+    # ax4[0].set_xticklabels([])
+    # ax4[1].set_xticklabels([])
+    ax4.set_ylabel(r"$\langle S_z \rangle_{GS}$", fontsize=18)
+    ax4.set_xlabel(r"$g$", fontsize=18)
 
-    ax4[0].plot(gvals, Sx, color="r")
-    ax4[1].plot(gvals, Sy, color="cyan")
-    ax4[2].plot(gvals, Sz, color="purple")
+    # ax4[0].plot(gvals, Sx, color="r", label=r"MPS")
+    # ax4[1].plot(gvals, Sy, color="cyan", label=r"MPS")
+    ax4.plot(gvals, Sz, color="purple", ls="", marker="o", label=r"MPS")
+
+    load_sz = np.loadtxt(folder + f"/g0s_vs_magnetization_wc_{int(wc):d}.txt")
+    gs, sz = load_sz[:, 0], load_sz[:, 1]
+
+    ax4.plot(
+        gs,
+        sz,
+        color="purple",
+        label=r"$Polaron$",
+    )
 
     def wk_pos(k, ω0, ωc):
         return ω0 * ωc / np.sqrt(ω0**2 + 2 * ωc**2 * (1 - np.cos(k)))
@@ -159,20 +160,20 @@ def plot_from_pickle(pickle_path, plot_field=True):
         B = (4 * g0**2 / np.pi) * I3
         z = -B * delta * np.exp(-A0)
 
-        return np.real(-(1 / B) * lambertw(z))
+        return np.real(-(1 / B) * scipy.special.lambertw(z))
 
-    A = 2 * g**2 * (1 / wc**2 + 2 / w0**2)
+    # A = 2 * g**2 * (1 / wc**2 + 2 / w0**2)
     B = I3_numeric(w0, wc)
-    W0 = deltar_lambert(1.0, gvals, w0, wc, B)
-    Szteo = (1 / B) * W0
+    W0 = deltar_lambert(0.15, gvals, w0, wc, B)
+    Szteo = -0.5 * (1 / 0.15) * W0
 
-    ax4[2].plot(
-        gvals, Szteo, color="k", ls="--", label=r"$\langle S_z \rangle_{GS}^{teo}$"
-    )
+    ax4.plot(gvals, Szteo, color="k", ls="--", label=r"$Polaron_{teo}$")
+    ax4.legend()
 
-    ax4[0].grid()
-    ax4[1].grid()
-    ax4[2].grid()
+    # ax4[0].grid()
+    # ax4[1].grid()
+    # ax4[2].grid()
+    ax4.grid()
 
     plt.tight_layout()
 
