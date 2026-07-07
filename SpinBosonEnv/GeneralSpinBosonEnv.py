@@ -20,6 +20,8 @@ class GeneralSpinBosonEnv:
             ohmic_model = SubSubOhmicModel
         elif SB_params["ohmic_model"] == "TFM":
             ohmic_model = TFMOhmicModel
+        else:
+            raise ValueError(f"No such {SB_params["ohmic_model"]} model")
 
         """PARAMETROS DEL ENTORNO SPIN-BOSON"""
 

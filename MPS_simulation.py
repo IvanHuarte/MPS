@@ -56,16 +56,15 @@ Nk = SB_params["Nk"]
 
 w_min = w0 * wc / np.sqrt(w0**2 + 4 * wc**2)
 
-lamda_list = [0.3, 0.45, 0.48, 0.49, w_min, 0.5, 0.51, 0.55, 0.7, 0.8, 0.9]
-lamda_list = [45, 48, 49, 49.5, wc, 50.5, 51, 55]
+delta_list = [0.3, 0.45, 0.48, 0.49, w_min, 0.5, 0.51, 0.55, 0.7, 0.8, 0.9]
+# delta_list = [45, 48, 49, 49.5, wc, 50.5, 51, 55]
 
 g_list = np.arange(0.0, 2.05, 0.05)
 
-for lamda in lamda_list:
-    SB_params["wc"] = wc
-    SB_params["Nk"] = Nk
+for delta in delta_list:
+    SB_params["delta"] = delta
 
-    main_results = np.zeros((len(g_list), 10))
+    main_results = np.zeros((len(g_list), 11))
 
     for i, g in enumerate(g_list):
         SB_params["g"] = g
@@ -96,7 +95,7 @@ for lamda in lamda_list:
         E_gr, psi_gr = eng.run()
 
         """ Save results """
-        # Save as: w0 | wc | Nk | g | E_gr | Sx | Sy | Sz | S_bond | alpha
+        # Save as: w0 | wc | Nk | g | E_gr | Sz | Sx | Sy | S_bond | alpha | delta
 
         Sz = psi_gr.expectation_value("Sz", caa.atpos_idx)
         Sx = psi_gr.expectation_value("Sx", caa.atpos_idx)
@@ -119,15 +118,16 @@ for lamda in lamda_list:
         main_results[i][7] = Sy[0]
         main_results[i][8] = Sbond
         main_results[i][9] = env_SB.alpha
+        main_results[i][10] = SB_params["delta"]
 
-        # N = psi_gr.expectation_value(caa.OperatorChain("N"), caa.bs_idx)
-        # C = psi_gr.correlation_function(
-        #     caa.OperatorChain("Bd"), caa.OperatorChain("B"), caa.bs_idx, caa.bs_idx
-        # )
-        # Nx = Map2Xcontraction(C, env_SB.basis)
+        N = psi_gr.expectation_value(caa.OperatorChain("N"), caa.bs_idx)
+        C = psi_gr.correlation_function(
+            caa.OperatorChain("Bd"), caa.OperatorChain("B"), caa.bs_idx, caa.bs_idx
+        )
+        Nx = Map2Xcontraction(C, env_SB.basis)
 
-        # np.savetxt(write_folder + "GroundState_wc_%.4f_g_%.4f_delta_%.4f_NoccMap.txt" % (wc, g, SB_params["delta"]), N)
-        # np.savetxt(write_folder + "GroundState_wc_%.4f_g_%.4f_delta_%.4f_NoccX.txt" % (wc, g, SB_params["delta"]), Nx)
+        np.savetxt(write_folder + "GroundState_wc_%.4f_g_%.4f_delta_%.4f_NoccMap.txt" % (wc, g, SB_params["delta"]), N)
+        np.savetxt(write_folder + "GroundState_wc_%.4f_g_%.4f_delta_%.4f_NoccX.txt" % (wc, g, SB_params["delta"]), Nx)
 
     with open(write_folder + "Main_results_wc_%.4f_Nk_%.4f_delta_%.4f.pkl" % (wc, Nk, SB_params["delta"]), "wb") as f:
         pickle.dump(main_results, f)

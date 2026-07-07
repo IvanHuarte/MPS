@@ -38,7 +38,7 @@ def plot_from_pickle(pickle_path, plot_field=True):
         ax1.set_xlabel(r"$n$", fontsize=18)
         ax1.set_ylabel(r"$\langle a_n^\dagger a_n \rangle_{GS}$", fontsize=18)
         ax1.set_ylim(1e-20, 1e1)
-        ax1.set_xlim(1 / nprime - 0.001, 3)
+        ax1.set_xlim(1 / nprime - 0.001, Nk//2 / nprime)
 
         ax1.text(
             1,
