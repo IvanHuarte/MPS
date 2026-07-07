@@ -1,17 +1,28 @@
 import numpy as np
 
 
-def OhmicModel(Nk, wc, w0, g):
+def TFMOhmicModel(Nk, wc, w0, g):
 
-    """ For 1 atom and v_group = 1"""
+    k = np.linspace(-wc, wc, Nk)
+    wk = abs(k)
+
+    alpha = 2 * g**2 / np.pi
+    gk = g * np.sqrt(wk)
+
+    return (k, wk, gk, alpha)
+
+
+def OhmicModel(Nk, wc, w0, g):
+    """For 1 atom and v_group = 1"""
 
     k = np.linspace(-np.pi, np.pi, Nk)
     wk = np.abs(k)
 
-    gk = g * np.exp(-wk /(2 * wc)) * np.sqrt(wk / 2)
+    gk = g * np.exp(-wk / (2 * wc)) * np.sqrt(wk / 2)
     alpha = g**2 / np.pi
-    
+
     return (k, wk, gk, alpha)
+
 
 def SubSubOhmicModel(Nk, wc, w0, g):
 

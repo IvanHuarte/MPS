@@ -41,7 +41,9 @@ for k, v in SB_params.items():
 
 # Create simulation folder
 sim_uuid = str(uuid.uuid4())[:8]
-write_folder = f"/home/ihuarte/Escritorio/Ivan/MPS/Results/{SB_params["ohmic_model"]}/{sim_uuid}/"
+write_folder = (
+    f"/home/ihuarte/Escritorio/Ivan/MPS/Results/{SB_params["ohmic_model"]}/{sim_uuid}/"
+)
 os.makedirs(write_folder, exist_ok=True)
 shutil.copy("/home/ihuarte/Escritorio/Ivan/MPS/config.json", write_folder)
 

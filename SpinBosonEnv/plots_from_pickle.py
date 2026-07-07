@@ -18,7 +18,7 @@ def plot_from_pickle(pickle_path, plot_field=True):
 
     with open(pickle_path, "rb") as f:
         data = pkl.load(f)
-    # Saved as: w0 | wc | Nk | g | E_gr | Sx | Sy | Sz | S_bond |
+    # Saved as: w0 | wc | Nk | g | E_gr | Sx | Sy | Sz | S_bond | alpha
 
     # OCUPPATION VS SITES
 
@@ -31,14 +31,14 @@ def plot_from_pickle(pickle_path, plot_field=True):
 
     if plot_field:
 
-        fig1, ax1 = plt.subplots(figsize=[8, 8])
+        fig1, ax1 = plt.subplots(figsize=[10, 8])
         ax1.set_title(
-            r"$Occupation\;decayment \quad (n^\star=%.2f)$" % (nprime), fontsize=18
+            r"$Ground\;state\;photons \quad (n^\star=%.2f)$" % (nprime), fontsize=18
         )
-        ax1.set_xlabel(r"$n$", fontsize=18)
+        ax1.set_xlabel(r"$n/n^\star$", fontsize=18)
         ax1.set_ylabel(r"$\langle a_n^\dagger a_n \rangle_{GS}$", fontsize=18)
-        ax1.set_ylim(1e-20, 1e1)
-        ax1.set_xlim(1 / nprime - 0.001, 3)
+        ax1.set_ylim(1e-17, 1e1)
+        ax1.set_xlim(1 / nprime - 0.001, (Nk // 2) / nprime + 0.1)
 
         ax1.text(
             1,
@@ -49,7 +49,7 @@ def plot_from_pickle(pickle_path, plot_field=True):
             ),
             fontsize=12,
         )
-        cmap = plt.colormaps["viridis"](np.linspace(0, 1, len(gvals)))
+        cmap = plt.colormaps["inferno"](np.linspace(0, 1, len(gvals)))
 
         for i, g in enumerate(gvals):
             Nx = np.loadtxt(
@@ -78,7 +78,7 @@ def plot_from_pickle(pickle_path, plot_field=True):
                 label=r"$g=%.2f$" % g,
             )
 
-        ax1.vlines(1, 1e-18, 1e1, color="grey", ls="--")
+        ax1.vlines(1, 1e-20, 1e1, color="grey", ls="--")
         ax1.legend()
         ax1.set_yscale("log")
         ax1.set_xscale("log")
@@ -115,6 +115,7 @@ def plot_from_pickle(pickle_path, plot_field=True):
 
     # SPIN OBSERVABLES
     gvals = data[:, 3]
+    alphavals = gvals**2 / np.pi
     Sz = data[:, 5]
     # Sx = data[:, 6]
     # Sy = data[:, 7]
@@ -132,42 +133,60 @@ def plot_from_pickle(pickle_path, plot_field=True):
 
     # ax4[0].plot(gvals, Sx, color="r", label=r"MPS")
     # ax4[1].plot(gvals, Sy, color="cyan", label=r"MPS")
-    ax4.plot(gvals, Sz, color="purple", ls="", marker="o", label=r"MPS")
+    ax4.plot(alphavals, Sz, color="purple", ls="", marker="o", label=r"MPS")
 
-    load_sz = np.loadtxt(folder + f"/g0s_vs_magnetization_wc_{int(wc):d}.txt")
-    gs, sz = load_sz[:, 0], load_sz[:, 1]
+    # if wc != 100:
 
-    ax4.plot(
-        gs,
-        sz,
-        color="purple",
-        label=r"$Polaron$",
-    )
+    #     load_sz = np.loadtxt(folder + f"/g0s_vs_magnetization_wc_{int(wc):d}.txt")
+    #     gs, sz = load_sz[:, 0], load_sz[:, 1]
 
-    def wk_pos(k, ω0, ωc):
-        return ω0 * ωc / np.sqrt(ω0**2 + 2 * ωc**2 * (1 - np.cos(k)))
+    #     ax4.plot(
+    #         gs,
+    #         sz,
+    #         color="purple",
+    #         label=r"$Polaron$",
+    #     )
 
-    def I3_numeric(ω0, ωc, Nk=200000):
-        k = np.linspace(0, np.pi, Nk)
-        wk = wk_pos(k, ω0, ωc)
-        return np.trapezoid(1 / wk**3, k)
+    ## SUBSUBOHMIC
+    # def wk_pos(k, ω0, ωc):
+    #     # Subsubohmic
+    #     wk = ω0 * ωc / np.sqrt(ω0**2 + 2 * ωc**2 * (1 - np.cos(k)))
+    #     # Ohmic TFM
+    #     wk = np.abs(k)
+    #     return wk
 
-    def deltar_lambert(delta, g0, ω0, ωc, I3):
-        # if g0 == 0:
-        #     return delta
+    # def I3_numeric(ω0, ωc, Nk=200000):
+    #     k = np.linspace(0, np.pi, Nk)
+    #     wk = wk_pos(k, ω0, ωc)
+    #     return np.trapezoid(1 / wk**3, k)
 
-        A0 = 2 * g0**2 * (1 / ωc**2 + 2 / ω0**2)
-        B = (4 * g0**2 / np.pi) * I3
-        z = -B * delta * np.exp(-A0)
+    # def deltar_lambert(delta, g0, ω0, ωc, I3):
+    #     # if g0 == 0:
+    #     #     return delta
 
-        return np.real(-(1 / B) * scipy.special.lambertw(z))
+    #     A0 = 2 * g0**2 * (1 / ωc**2 + 2 / ω0**2)
+    #     B = (4 * g0**2 / np.pi) * I3
+    #     z = -B * delta * np.exp(-A0)
 
-    # A = 2 * g**2 * (1 / wc**2 + 2 / w0**2)
-    B = I3_numeric(w0, wc)
-    W0 = deltar_lambert(0.15, gvals, w0, wc, B)
-    Szteo = -0.5 * (1 / 0.15) * W0
+    #     return np.real(-(1 / B) * scipy.special.lambertw(z))
 
-    ax4.plot(gvals, Szteo, color="k", ls="--", label=r"$Polaron_{teo}$")
+    # B = I3_numeric(w0, wc)
+    # W0 = deltar_lambert(1.0, gvals, w0, wc, B)
+    # Szteo = -0.5 * (1 / 1.0) * W0
+
+    # OHMIC
+    print(f"gvals : {gvals}")
+    alphavals = gvals**2 / np.pi
+    print(f"alphavals: {alphavals}")
+    delta = 1.0
+    delta_r = delta * (0.01 * delta / wc) ** (alphavals / (1 - alphavals))
+    print(f"delta_r: {delta_r}")
+    print(wc)
+
+    Szteo = -0.5 * delta_r / delta
+
+    ax4.plot(alphavals[:-1], Szteo[:-1], color="k", ls="--", label=r"$Polaron_{teo}$")
+    print(Szteo)
     ax4.legend()
 
     # ax4[0].grid()
@@ -177,11 +196,13 @@ def plot_from_pickle(pickle_path, plot_field=True):
 
     plt.tight_layout()
 
-    fig1.savefig(
-        write_folder + f"Nx_RealSpace_occupation_{sim_label}.pdf",
-        dpi=600,
-        bbox_inches="tight",
-    )
+    if plot_field:
+        fig1.savefig(
+            write_folder + f"Nx_RealSpace_occupation_{sim_label}.pdf",
+            dpi=600,
+            bbox_inches="tight",
+        )
+        plt.close(fig1)
     fig2.savefig(write_folder + f"Energy_{sim_label}.pdf", dpi=600, bbox_inches="tight")
     fig3.savefig(
         write_folder + f"Entropy_{sim_label}.pdf", dpi=600, bbox_inches="tight"
@@ -190,7 +211,6 @@ def plot_from_pickle(pickle_path, plot_field=True):
         write_folder + f"SpinOps_{sim_label}.pdf", dpi=600, bbox_inches="tight"
     )
 
-    plt.close(fig1)
     plt.close(fig2)
     plt.close(fig3)
     plt.close(fig4)

@@ -11,7 +11,7 @@ class GeneralSpinBosonEnv:
         # wk = Distribution of mode frequencies (degeneracies allowed)
         # gk = Coupling of the system to each mode
         #
-        
+
         """MODELO OHMICO"""
 
         if SB_params["ohmic_model"] == "Ohmic":
@@ -58,8 +58,6 @@ class GeneralSpinBosonEnv:
         Hk[1:, 0] = self.gk
 
         self.Hk = Hk
-
-
 
     def Hmapping(self, wks, gks, tol=1e-10):
         """

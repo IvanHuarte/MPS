@@ -21,4 +21,4 @@ files = glob.glob(f"{directory}/**/*.pkl", recursive=True)
 for file in files:
     print(f"\n\nFile:{file}")
 
-    plot_from_pickle(file, plot_field=True)
+    plot_from_pickle(file, plot_field=False)
