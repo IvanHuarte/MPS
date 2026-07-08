@@ -37,8 +37,8 @@ def plot_from_pickle(pickle_path, plot_field=True):
         )
         ax1.set_xlabel(r"$n/n^\star$", fontsize=18)
         ax1.set_ylabel(r"$\langle a_n^\dagger a_n \rangle_{GS}$", fontsize=18)
-        ax1.set_ylim(1e-17, 1e1)
-        ax1.set_xlim(1 / nprime - 0.001, (Nk // 2) / nprime + 0.1)
+        ax1.set_ylim(1e-20, 1e1)
+        ax1.set_xlim(1 / nprime - 0.001, Nk // 2 / nprime)
 
         ax1.text(
             1,
@@ -83,6 +83,12 @@ def plot_from_pickle(pickle_path, plot_field=True):
         ax1.set_yscale("log")
         ax1.set_xscale("log")
         ax1.grid()
+        fig1.savefig(
+            write_folder + f"Nx_RealSpace_occupation_{sim_label}.pdf",
+            dpi=600,
+            bbox_inches="tight",
+        )
+        plt.close(fig1)
 
     # ENERGY
     gvals = data[:, 3]
@@ -116,6 +122,7 @@ def plot_from_pickle(pickle_path, plot_field=True):
     # SPIN OBSERVABLES
     gvals = data[:, 3]
     alphavals = gvals**2 / np.pi
+
     Sz = data[:, 5]
     # Sx = data[:, 6]
     # Sy = data[:, 7]
@@ -129,7 +136,7 @@ def plot_from_pickle(pickle_path, plot_field=True):
     # ax4[0].set_xticklabels([])
     # ax4[1].set_xticklabels([])
     ax4.set_ylabel(r"$\langle S_z \rangle_{GS}$", fontsize=18)
-    ax4.set_xlabel(r"$g$", fontsize=18)
+    ax4.set_xlabel(r"$\alpha $", fontsize=18)
 
     # ax4[0].plot(gvals, Sx, color="r", label=r"MPS")
     # ax4[1].plot(gvals, Sy, color="cyan", label=r"MPS")
@@ -139,6 +146,15 @@ def plot_from_pickle(pickle_path, plot_field=True):
 
     #     load_sz = np.loadtxt(folder + f"/g0s_vs_magnetization_wc_{int(wc):d}.txt")
     #     gs, sz = load_sz[:, 0], load_sz[:, 1]
+    # load_sz = np.loadtxt(folder + f"/g0s_vs_magnetization_wc_{int(wc):d}.txt")
+    # gs, sz = load_sz[:, 0], load_sz[:, 1]
+
+    # ax4.plot(
+    #     gs,
+    #     sz,
+    #     color="purple",
+    #     label=r"$Polaron$",
+    # )
 
     #     ax4.plot(
     #         gs,
@@ -203,6 +219,7 @@ def plot_from_pickle(pickle_path, plot_field=True):
             bbox_inches="tight",
         )
         plt.close(fig1)
+
     fig2.savefig(write_folder + f"Energy_{sim_label}.pdf", dpi=600, bbox_inches="tight")
     fig3.savefig(
         write_folder + f"Entropy_{sim_label}.pdf", dpi=600, bbox_inches="tight"

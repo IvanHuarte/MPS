@@ -1,11 +1,11 @@
 {
     "SB_params": {
-        "ohmic_model": "SubSubOhmic",
-        "wc": 50.0,
+        "ohmic_model": "TFM",
+        "wc": "pi",
         "w0": 1.0,
-        "Nk" : 800,
+        "Nk" : 201,
         "g" : 1.5,
-        "delta" : 0.15
+        "delta" : 0.1
     },
 
     "model_params" : {

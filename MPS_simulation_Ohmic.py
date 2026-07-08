@@ -7,11 +7,9 @@ import shutil
 import uuid
 
 import numpy as np
-from tenpy.algorithms.dmrg import TwoSiteDMRGEngine
-
-from SpinBosonEnv.Basis import Map2Xcontraction
 from SpinBosonEnv.CavityArrayAtom import CavityArrayAtom
 from SpinBosonEnv.GeneralSpinBosonEnv import GeneralSpinBosonEnv
+from tenpy.algorithms.dmrg import TwoSiteDMRGEngine
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -41,7 +39,9 @@ for k, v in SB_params.items():
 
 # Create simulation folder
 sim_uuid = str(uuid.uuid4())[:8]
-write_folder = f"/home/ihuarte/Escritorio/Ivan/MPS/Results/{SB_params["ohmic_model"]}/{sim_uuid}/"
+write_folder = (
+    f"/home/ihuarte/Escritorio/Ivan/MPS/Results/{SB_params["ohmic_model"]}/{sim_uuid}/"
+)
 os.makedirs(write_folder, exist_ok=True)
 shutil.copy("/home/ihuarte/Escritorio/Ivan/MPS/config.json", write_folder)
 
@@ -51,10 +51,11 @@ shutil.copy("/home/ihuarte/Escritorio/Ivan/MPS/config.json", write_folder)
 # wc_list = [0.5, 1.0, 5.0, 10.0, 50.0, 100.0]  # , 500.0, 1000.0]
 # Nk_list = [101, 101, 101, 101, 301, 501]  # , 2501, 5001]
 # wc_list = [10.0]  # , 500.0, 1000.0]
-Nk_list = [301]  # , 2501, 5001]
-wc_list = Nk_list
+wc_list = [np.pi]
+Nk_list = [101]  # , 2501, 5001]
 
-g_list = np.arange(0.0, 1.85, 0.05)
+
+g_list = np.arange(0.0, 0.177, 0.005)
 
 for wc, Nk in zip(wc_list, Nk_list):
     SB_params["wc"] = wc
@@ -72,8 +73,6 @@ for wc, Nk in zip(wc_list, Nk_list):
 
         # Spin Boson model init
         env_SB = GeneralSpinBosonEnv(SB_params)
-        print(f"Hk: {env_SB.Hk.shape}")
-        print(f"Hmap: {env_SB.Hmap.shape}")
 
         # Tenpy init
         model_params["L"] = len(env_SB.wlist)
