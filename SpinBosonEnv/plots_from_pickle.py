@@ -7,6 +7,7 @@ import matplotlib.transforms as transforms
 import numpy as np
 import scipy
 
+plt.rcParams["text.usetex"] = True
 
 def plot_from_pickle(pickle_path, plot_field=True):
 
@@ -18,16 +19,18 @@ def plot_from_pickle(pickle_path, plot_field=True):
 
     with open(pickle_path, "rb") as f:
         data = pkl.load(f)
-    # Saved as: w0 | wc | Nk | g | E_gr | Sx | Sy | Sz | S_bond | alpha
+    # Saved as: w0 | wc | Nk | g | E_gr | Sx | Sy | Sz | S_bond | alpha | delta
 
     # OCUPPATION VS SITES
 
     w0 = int(data[:, 0][0])
     wc = int(data[:, 1][0])
     Nk = int(data[:, 2][0])
+    delta = float(data[:, 10][0])
     gvals = data[:, 3][1::5]
 
     nprime = wc / w0
+    wmin = w0 * wc / np.sqrt(w0**2 + 4 * wc**2)
 
     if plot_field:
 
@@ -49,11 +52,26 @@ def plot_from_pickle(pickle_path, plot_field=True):
             ),
             fontsize=12,
         )
+        ax1.text(
+            0.4,
+            0.9,
+            (
+                rf"$\Delta = {delta:.3f}$"
+                "\n"
+                rf"$\omega_c = {wc:.3f}$"
+                "\n"
+                rf"$\omega_{{\min}} = {wmin:.3f}$"
+            ),
+            transform=transforms.blended_transform_factory(
+                ax1.transAxes, ax1.transAxes
+            ),
+            fontsize=12,
+        )
         cmap = plt.colormaps["inferno"](np.linspace(0, 1, len(gvals)))
 
         for i, g in enumerate(gvals):
             Nx = np.loadtxt(
-                folder + "/GroundState_wc_%.4f_g_%.4f_NoccX.txt" % (wc, g),
+                folder + "/GroundState_wc_%.4f_g_%.4f_delta_%.4f_NoccX.txt" % (wc, g, delta),
                 dtype=complex,
             ).real
             Nxhalf = Nx[Nk // 2 :]
@@ -163,46 +181,39 @@ def plot_from_pickle(pickle_path, plot_field=True):
     #         label=r"$Polaron$",
     #     )
 
-    ## SUBSUBOHMIC
-    # def wk_pos(k, ω0, ωc):
-    #     # Subsubohmic
-    #     wk = ω0 * ωc / np.sqrt(ω0**2 + 2 * ωc**2 * (1 - np.cos(k)))
-    #     # Ohmic TFM
-    #     wk = np.abs(k)
-    #     return wk
+    # SUBSUBOHMIC
+    def wk_pos(k, ω0, ωc):
+        # Subsubohmic
+        wk = ω0 * ωc / np.sqrt(ω0**2 + 2 * ωc**2 * (1 - np.cos(k)))
 
-    # def I3_numeric(ω0, ωc, Nk=200000):
-    #     k = np.linspace(0, np.pi, Nk)
-    #     wk = wk_pos(k, ω0, ωc)
-    #     return np.trapezoid(1 / wk**3, k)
+        return wk
 
-    # def deltar_lambert(delta, g0, ω0, ωc, I3):
-    #     # if g0 == 0:
-    #     #     return delta
+    def I3_numeric(ω0, ωc, Nk=200000):
+        k = np.linspace(0, np.pi, Nk)
+        wk = wk_pos(k, ω0, ωc)
+        return np.trapezoid(1 / wk**3, k)
 
-    #     A0 = 2 * g0**2 * (1 / ωc**2 + 2 / ω0**2)
-    #     B = (4 * g0**2 / np.pi) * I3
-    #     z = -B * delta * np.exp(-A0)
+    def deltar_lambert(delta, g0, ω0, ωc, I3):
+        # if g0 == 0:
+        #     return delta
 
-    #     return np.real(-(1 / B) * scipy.special.lambertw(z))
+        A0 = 2 * g0**2 * (1 / ωc**2 + 2 / ω0**2)
+        B = (4 * g0**2 / np.pi) * I3
+        z = -B * delta * np.exp(-A0)
 
-    # B = I3_numeric(w0, wc)
-    # W0 = deltar_lambert(1.0, gvals, w0, wc, B)
-    # Szteo = -0.5 * (1 / 1.0) * W0
+        return np.real(-(1 / B) * scipy.special.lambertw(z))
+
+    B = I3_numeric(w0, wc)
+    W0 = deltar_lambert(delta, gvals, w0, wc, B)
+    Szteo = -0.5 * (1 / delta) * W0
 
     # OHMIC
-    print(f"gvals : {gvals}")
     alphavals = gvals**2 / np.pi
-    print(f"alphavals: {alphavals}")
-    delta = 1.0
-    delta_r = delta * (0.01 * delta / wc) ** (alphavals / (1 - alphavals))
-    print(f"delta_r: {delta_r}")
-    print(wc)
+    delta_r = delta * (delta / wc) ** (alphavals / (1 - alphavals))
 
     Szteo = -0.5 * delta_r / delta
 
     ax4.plot(alphavals[:-1], Szteo[:-1], color="k", ls="--", label=r"$Polaron_{teo}$")
-    print(Szteo)
     ax4.legend()
 
     # ax4[0].grid()
