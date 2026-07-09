@@ -54,7 +54,7 @@ shutil.copy("/home/ihuarte/Escritorio/Ivan/MPS/config.json", write_folder)
 # Nk_list = [101, 101, 101, 101, 301, 501]  # , 2501, 5001]
 w0 = SB_params["w0"]
 wc = SB_params["wc"]
-Nk = SB_params["Nk"] 
+Nk = SB_params["Nk"]
 
 w_min = w0 * wc / np.sqrt(w0**2 + 4 * wc**2)
 
@@ -128,8 +128,22 @@ for delta in delta_list:
         )
         Nx = Map2Xcontraction(C, env_SB.basis)
 
-        np.savetxt(write_folder + "GroundState_wc_%.4f_g_%.4f_delta_%.4f_NoccMap.txt" % (wc, g, SB_params["delta"]), N)
-        np.savetxt(write_folder + "GroundState_wc_%.4f_g_%.4f_delta_%.4f_NoccX.txt" % (wc, g, SB_params["delta"]), Nx)
+        np.savetxt(
+            write_folder
+            + "GroundState_wc_%.4f_g_%.4f_delta_%.4f_NoccMap.txt"
+            % (wc, g, SB_params["delta"]),
+            N,
+        )
+        np.savetxt(
+            write_folder
+            + "GroundState_wc_%.4f_g_%.4f_delta_%.4f_NoccX.txt"
+            % (wc, g, SB_params["delta"]),
+            Nx,
+        )
 
-    with open(write_folder + "Main_results_wc_%.4f_Nk_%.4f_delta_%.4f.pkl" % (wc, Nk, SB_params["delta"]), "wb") as f:
+    with open(
+        write_folder
+        + "Main_results_wc_%.4f_Nk_%.4f_delta_%.4f.pkl" % (wc, Nk, SB_params["delta"]),
+        "wb",
+    ) as f:
         pickle.dump(main_results, f)

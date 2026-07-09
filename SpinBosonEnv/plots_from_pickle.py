@@ -139,7 +139,7 @@ def plot_from_pickle(pickle_path, plot_field=True):
 
     # SPIN OBSERVABLES
     gvals = data[:, 3]
-    alphavals = gvals**2 / np.pi
+    alphavals = data[:, 9]
 
     Sz = data[:, 5]
     # Sx = data[:, 6]
@@ -208,12 +208,26 @@ def plot_from_pickle(pickle_path, plot_field=True):
     Szteo = -0.5 * (1 / delta) * W0
 
     # OHMIC
+<<<<<<< HEAD
     alphavals = gvals**2 / np.pi
     delta_r = delta * (delta / wc) ** (alphavals / (1 - alphavals))
 
     Szteo = -0.5 * delta_r / delta
 
     ax4.plot(alphavals[:-1], Szteo[:-1], color="k", ls="--", label=r"$Polaron_{teo}$")
+=======
+    print(f"gvals : {gvals}")
+    alphavals = gvals**2 * Nk / np.pi
+    print(f"alphavals: {alphavals}")
+    delta_r = delta * (0.01 * delta / wc) ** (alphavals / (1 - alphavals))
+    print(f"delta_r: {delta_r}")
+    print(wc)
+
+    Szteo = -0.5 * delta_r / delta
+
+    ax4.plot(alphavals[:], Szteo[:], color="k", ls="--", label=r"$Polaron_{teo}$")
+    print(Szteo)
+>>>>>>> c4036e3 (Update)
     ax4.legend()
 
     # ax4[0].grid()
