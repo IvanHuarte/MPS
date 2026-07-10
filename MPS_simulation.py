@@ -56,9 +56,9 @@ wc = SB_params["wc"]
 Nk = SB_params["Nk"]
 
 w_min = w0 * wc / np.sqrt(w0**2 + 4 * wc**2)
-delta_list = [0.15, 0.3]#, 0.45] , 0.48, 0.49, w_min, 0.5, 0.51, 0.55, 0.7, 0.8, 0.9]
+delta_list = [0.15]#, 0.45] , 0.48, 0.49, w_min, 0.5, 0.51, 0.55, 0.7, 0.8, 0.9]
 # delta_list = [45, 48, 49, 49.5, wc, 50.5, 51, 55]
-g_list = np.concatenate([np.array([0.01]),np.arange(0.05, 2.05, 0.05)], axis=-1)
+g_list = np.concatenate([np.arange(0.01, 2.05, 0.05)], axis=-1)
 
 for delta in delta_list:
 
@@ -145,8 +145,8 @@ for delta in delta_list:
                 caa.OperatorChain("Bd"), caa.OperatorChain("B"), caa.bs_idx, caa.bs_idx
             )
             Nx = Map2Xcontraction(C, env_SB.basis)
-            print(f"N: ({type(N)})\n {N}")
-            print(f"Nx: ({type(Nx)})\n {Nx}")
+            # print(f"N: ({type(N)})\n {N}")
+            # print(f"Nx: ({type(Nx)})\n {Nx}")
 
             Nmap_path = write_folder + "Field_" + sim_label +"_NoccMap.txt"
             Nx_path = write_folder + "Field_" + sim_label +"_NoccX.txt"
