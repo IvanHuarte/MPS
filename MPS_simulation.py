@@ -3,8 +3,10 @@ import argparse
 import json
 import os
 import pickle
-import shutil
 import uuid
+from datetime import date
+import platform
+import tenpy
 
 import numpy as np
 from tenpy.algorithms.dmrg import TwoSiteDMRGEngine
@@ -31,6 +33,7 @@ if args.config is None:
 with open("/home/ihuarte/Escritorio/Ivan/MPS/config.json", "r") as f:
     config = json.load(f)
 
+sim_setup = config["sim_setup"]
 SB_params = config["SB_params"]
 model_params = config["model_params"]
 DMRG_options = config["DMRG_options"]
@@ -45,28 +48,33 @@ write_folder = (
     f"/home/ihuarte/Escritorio/Ivan/MPS/Results/{SB_params["ohmic_model"]}/{sim_uuid}/"
 )
 os.makedirs(write_folder, exist_ok=True)
-shutil.copy("/home/ihuarte/Escritorio/Ivan/MPS/config.json", write_folder)
 
 
 # Run in parameters
-
-# wc_list = [0.5, 1.0, 5.0, 10.0, 50.0, 100.0]  # , 500.0, 1000.0]
-# Nk_list = [101, 101, 101, 101, 301, 501]  # , 2501, 5001]
 w0 = SB_params["w0"]
 wc = SB_params["wc"]
 Nk = SB_params["Nk"]
 
 w_min = w0 * wc / np.sqrt(w0**2 + 4 * wc**2)
-
-delta_list = [0.3, 0.45, 0.48, 0.49, w_min, 0.5, 0.51, 0.55, 0.7, 0.8, 0.9]
+delta_list = [0.15, 0.3]#, 0.45] , 0.48, 0.49, w_min, 0.5, 0.51, 0.55, 0.7, 0.8, 0.9]
 # delta_list = [45, 48, 49, 49.5, wc, 50.5, 51, 55]
-
-g_list = np.arange(0.0, 2.05, 0.05)
+g_list = np.concatenate([np.array([0.01]),np.arange(0.05, 2.05, 0.05)], axis=-1)
 
 for delta in delta_list:
+
     SB_params["delta"] = delta
 
     main_results = np.zeros((len(g_list), 11))
+    sim_artifact = {}
+    sim_artifact["SIM"] = config
+
+    if sim_setup["field"]:
+        field_paths = {
+            "map": [],
+            "x": []
+        }
+
+    sim_label = f"{SB_params["ohmic_model"]}_w0_{w0:.4f}_wc_{wc:.4f}_Nk_{Nk:.4f}_delta_{delta:.4f}"
 
     for i, g in enumerate(g_list):
         SB_params["g"] = g
@@ -78,6 +86,7 @@ for delta in delta_list:
 
         # Spin Boson model init
         env_SB = GeneralSpinBosonEnv(SB_params)
+        print(f"Alpha: {env_SB.alpha}")
         print(f"Hk: {env_SB.Hk.shape}")
         print(f"Hmap: {env_SB.Hmap.shape}")
 
@@ -91,13 +100,19 @@ for delta in delta_list:
         caa = CavityArrayAtom(model_params, DMRG_options)
 
         """ GROUND STATE AND ENERGY """
-
-        initial_state = caa.InitialState(config=[], GS=False)
+        initial_state = caa.InitialState(config=[[0,1]], GS=False)
+        if model_params["conserve"] == "parity":
+            P0 = caa.calc_mps_parity(initial_state)
+            print(f"psi0 parity: {P0}")
+        
         eng = TwoSiteDMRGEngine(initial_state, caa, config["DMRG_options"])
         E_gr, psi_gr = eng.run()
 
+        if model_params["conserve"] == "parity":
+            P1 = caa.calc_mps_parity(initial_state)
+            print(f"psi ground parity: {P1}")
         """ Save results """
-        # Save as: w0 | wc | Nk | g | E_gr | Sz | Sx | Sy | S_bond | alpha | delta
+        # Saved as: w0 | wc | Nk | g | alpha | delta | E_gr | Sz | Sx | Sy | S_bond |
 
         Sz = psi_gr.expectation_value("Sz", caa.atpos_idx)
         Sx = psi_gr.expectation_value("Sx", caa.atpos_idx)
@@ -111,39 +126,83 @@ for delta in delta_list:
         print("Entanglement_S:", Sbond, "\n\n")
 
         main_results[i][0] = SB_params["w0"]
+        main_results[i][10] = SB_params["delta"]
         main_results[i][1] = wc
         main_results[i][2] = Nk
         main_results[i][3] = g
+        main_results[i][9] = env_SB.alpha
         main_results[i][4] = E_gr
         main_results[i][5] = Sz[0]
         main_results[i][6] = Sx[0]
         main_results[i][7] = Sy[0]
         main_results[i][8] = Sbond
-        main_results[i][9] = env_SB.alpha
-        main_results[i][10] = SB_params["delta"]
 
-        N = psi_gr.expectation_value(caa.OperatorChain("N"), caa.bs_idx)
-        C = psi_gr.correlation_function(
-            caa.OperatorChain("Bd"), caa.OperatorChain("B"), caa.bs_idx, caa.bs_idx
-        )
-        Nx = Map2Xcontraction(C, env_SB.basis)
+        if sim_setup["field"]:
+            print(f"Calculating population in bosonic field")                
+            
+            N = psi_gr.expectation_value(caa.OperatorChain("N"), caa.bs_idx)
+            C = psi_gr.correlation_function(
+                caa.OperatorChain("Bd"), caa.OperatorChain("B"), caa.bs_idx, caa.bs_idx
+            )
+            Nx = Map2Xcontraction(C, env_SB.basis)
+            print(f"N: ({type(N)})\n {N}")
+            print(f"Nx: ({type(Nx)})\n {Nx}")
 
-        np.savetxt(
-            write_folder
-            + "GroundState_wc_%.4f_g_%.4f_delta_%.4f_NoccMap.txt"
-            % (wc, g, SB_params["delta"]),
-            N,
-        )
-        np.savetxt(
-            write_folder
-            + "GroundState_wc_%.4f_g_%.4f_delta_%.4f_NoccX.txt"
-            % (wc, g, SB_params["delta"]),
-            Nx,
-        )
+            Nmap_path = write_folder + "Field_" + sim_label +"_NoccMap.txt"
+            Nx_path = write_folder + "Field_" + sim_label +"_NoccX.txt"
+
+            np.savetxt(
+                Nmap_path,
+                N,
+            )
+            np.savetxt(
+                Nx_path,
+                Nx,
+            )
+            field_paths["map"].append(Nmap_path)
+            field_paths["x"].append(Nx_path)
+
+
+    # Save results
+    main_results_path = write_folder + "Main_results_" + sim_label +".pkl"
 
     with open(
-        write_folder
-        + "Main_results_wc_%.4f_Nk_%.4f_delta_%.4f.pkl" % (wc, Nk, SB_params["delta"]),
+        main_results_path,
         "wb",
     ) as f:
         pickle.dump(main_results, f)
+
+    # Save artifact
+    sim_artifact["results"] = {
+        "main_results": main_results_path,
+        "field": field_paths
+    }
+    sim_artifact["labels"] = {
+        "sim_label": sim_label
+    }
+    # Write metadata in main setup artifact
+    metadata = {
+        "uuid": sim_uuid,
+        "date": date.today().strftime("%x"),
+        "architecture": platform.architecture(),
+        "versions": {
+            "python": platform.python_version(),
+            "numpy": np.__version__,
+            "scipy": tenpy.__version__,
+        },
+        "device" :{
+            "processor": platform.processor(),
+            "machine": platform.machine(),
+            "platform": platform.platform(),
+        }
+    }
+
+    sim_artifact["metadata"] = metadata
+
+    artifact_path = write_folder + "Simulation_results_" + sim_label + f"_UUID_{sim_uuid}.json"
+    with open(
+        artifact_path,
+        "wb",
+    ) as f:
+        json.dump(sim_artifact, f)
+    

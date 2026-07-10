@@ -7,6 +7,16 @@ from tenpy.models.model import CouplingModel
 from tenpy.networks.mps import MPS
 from tenpy.networks.site import BosonSite, GroupedSite, SpinSite, set_common_charges
 
+def add_parity_ops(spin, boson):
+
+    P_spin = -2.0 * spin.get_op("Sz")
+    P_bosons = np.diag([(-1)**n for n in range(boson.dim)])
+
+    spin.add_op("parity", P_spin)
+    boson.add_op("parity", P_bosons)
+
+    return spin, boson
+
 
 class CavityArrayAtom:
 
@@ -27,15 +37,31 @@ class CavityArrayAtom:
             model_params["bc_mps"],
             model_params["bc"],
         )
+        conserve = model_params["conserve"]
         if self.GS:
             self.L -= self.Q
 
         """SITES"""
-        self.bs = BosonSite(Nmax=model_params["N_max"])
-        self.sp = SpinSite(S=model_params["S_max"], conserve="parity", sort_charge=True)
+        self.bs = BosonSite(Nmax=model_params["N_max"], conserve=conserve)
+        self.sp = SpinSite(S=model_params["S_max"], conserve=conserve, sort_charge=True)
+        if conserve == "parity":
+
+            add_parity_ops(self.sp, self.bs)
+            set_common_charges(
+                [self.bs, self.sp],
+                new_charges=[
+                    [
+                        (1, 0, "parity_N"),
+                        (1, 1, "parity_Sz"),
+                    ]
+                ],
+                new_names=["parity"],
+                new_mod=[2],
+            )
         self.add_projectors(self.bs)
         self.add_projectors(self.sp)
-        set_common_charges([self.bs, self.sp], new_charges=[])
+
+        
         if self.GS:
             self.gs = GroupedSite(
                 [self.bs, self.sp], labels=None, charges="independent"
@@ -258,6 +284,7 @@ class CavityArrayAtom:
             self.psi0 = MPS.from_product_state(
                 self.lat.mps_sites(), p, bc=self.lat.bc_MPS, permute=False
             )
+            return self.psi0
 
     def GroundState(self, options):
         initial_state = self.InitialState(config=[], GS=self.GS)
@@ -335,6 +362,12 @@ class CavityArrayAtom:
             proj = npc.diag(p, site.leg, labels=["p", "p*"])
             site.add_op(op + str(i), proj)
 
+    def calc_mps_parity(self, psi):
+        Ps = psi.expectation_value(["parity"], self.atpos_idx)
+        Pb = psi.expectation_value(["parity"], self.bs_idx)
+        P_global = np.concatenate([Ps, Pb], axis=-1).prod()
+        return P_global
+    
     """def state_probability(psi,ops):
         
         psi.apply_local_op(0, proj, unitary=True)

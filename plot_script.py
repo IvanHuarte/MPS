@@ -1,24 +1,30 @@
 #!/home/ihuarte/Escritorio/Ivan/MPS/.venv/bin/python
 
+import json
 import argparse
 import glob
+from pathlib import Path
 
-from SpinBosonEnv.plots_from_pickle import plot_from_pickle
+from SpinBosonEnv.plots_from_artifact import plot_from_artifact
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "-d",
     "--directory",
     required=True,
-    help="Directory of MPS results (pkl)",
+    help="Directory of MPS artifacts (.json)",
 )
 
 args = parser.parse_args()
 directory = args.directory
 
-files = glob.glob(f"{directory}/**/*.pkl", recursive=True)
+project_folder = str((Path(__file__).parent)) + "/"
+with open(project_folder + "/config_plots.json", "wb") as f:
+    plot_config = json.load(f)
 
-for file in files:
-    print(f"\n\nFile:{file}")
+files = glob.glob(f"{directory}/**/*results*.json", recursive=True)
 
-    plot_from_pickle(file, plot_field=True)
+
+for artifact_path in files:
+    print(f"\n\nFile:{artifact_path}")
+    plot_from_artifact(artifact_path, plot_config)

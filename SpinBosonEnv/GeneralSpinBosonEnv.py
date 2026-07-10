@@ -24,12 +24,9 @@ class GeneralSpinBosonEnv:
             raise ValueError(f"No such {SB_params["ohmic_model"]} model")
 
         """PARAMETROS DEL ENTORNO SPIN-BOSON"""
-
+        kwargs = {"w0": SB_params["w0"], "delta": SB_params["delta"]}
         self.k, self.wk, self.gk, self.alpha = ohmic_model(
-            SB_params["Nk"],
-            SB_params["wc"],
-            SB_params["w0"],
-            SB_params["g"],
+            SB_params["Nk"], SB_params["wc"], SB_params["g"], **kwargs
         )
 
         """ HAMILTONIANO MAPPING """
@@ -91,7 +88,7 @@ class GeneralSpinBosonEnv:
 
         # The first vector of our basis is given by the normalized mode couplings.
         # This ensures that we obtain the expected coupling only at cavity 0.
-        g0 = np.linalg.norm(gks)
+        g0 = np.linalg.norm(gks)  # / self.Nk
         print("g0", g0)
         self.g0 = g0
         v0 = gks / g0

@@ -7,7 +7,7 @@
         "ohmic_model": "SubSubOhmic",
         "wc": 50,
         "w0": 1.0,
-        "Nk" : 501,
+        "Nk" : 10,
         "g" : null,
         "delta" : null
     },

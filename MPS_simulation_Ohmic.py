@@ -7,9 +7,10 @@ import shutil
 import uuid
 
 import numpy as np
+from tenpy.algorithms.dmrg import TwoSiteDMRGEngine
+
 from SpinBosonEnv.CavityArrayAtom import CavityArrayAtom
 from SpinBosonEnv.GeneralSpinBosonEnv import GeneralSpinBosonEnv
-from tenpy.algorithms.dmrg import TwoSiteDMRGEngine
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -51,17 +52,18 @@ shutil.copy("/home/ihuarte/Escritorio/Ivan/MPS/config.json", write_folder)
 # wc_list = [0.5, 1.0, 5.0, 10.0, 50.0, 100.0]  # , 500.0, 1000.0]
 # Nk_list = [101, 101, 101, 101, 301, 501]  # , 2501, 5001]
 # wc_list = [10.0]  # , 500.0, 1000.0]
-wc_list = [np.pi]
-Nk_list = [101]  # , 2501, 5001]
+
+wc_list = [20]
+Nk_list = [101]
 
 
-g_list = np.arange(0.0, 0.177, 0.005)
+g_list = np.arange(0.0, 1.0, 0.05)
 
 for wc, Nk in zip(wc_list, Nk_list):
     SB_params["wc"] = wc
     SB_params["Nk"] = Nk
 
-    main_results = np.zeros((len(g_list), 10))
+    main_results = np.zeros((len(g_list), 11))
 
     for i, g in enumerate(g_list):
         SB_params["g"] = g
@@ -87,7 +89,7 @@ for wc, Nk in zip(wc_list, Nk_list):
 
         initial_state = caa.InitialState(config=[], GS=False)
         eng = TwoSiteDMRGEngine(initial_state, caa, config["DMRG_options"])
-        E_gr, psi_gr = eng.run()
+        E, psi_gr = eng.run()
 
         """ Save results """
         # Save as: w0 | wc | Nk | g | E_gr | Sx | Sy | Sz | S_bond | alpha
@@ -97,7 +99,7 @@ for wc, Nk in zip(wc_list, Nk_list):
         Sy = psi_gr.expectation_value("Sy", caa.atpos_idx)
         Sbond = psi_gr.entanglement_entropy(n=1)[0]
 
-        print("E_gr:%.2f " % E_gr)
+        print("E_gr:%.2f " % E)
         print("Sz: ", Sz)
         print("Sx", Sx)
         print("Sy", Sy)
@@ -106,13 +108,14 @@ for wc, Nk in zip(wc_list, Nk_list):
         main_results[i][0] = SB_params["w0"]
         main_results[i][1] = wc
         main_results[i][2] = Nk
-        main_results[i][3] = g
-        main_results[i][4] = E_gr
-        main_results[i][5] = Sz[0]
-        main_results[i][6] = Sx[0]
-        main_results[i][7] = Sy[0]
-        main_results[i][8] = Sbond
-        main_results[i][9] = env_SB.alpha
+        main_results[i][3] = SB_params["delta"]
+        main_results[i][4] = g
+        main_results[i][5] = env_SB.alpha
+        main_results[i][6] = E
+        main_results[i][7] = Sx[0]
+        main_results[i][8] = Sy[0]
+        main_results[i][9] = Sz[0]
+        main_results[i][10] = Sbond
 
         # N = psi_gr.expectation_value(caa.OperatorChain("N"), caa.bs_idx)
         # C = psi_gr.correlation_function(
@@ -123,5 +126,9 @@ for wc, Nk in zip(wc_list, Nk_list):
         # np.savetxt(write_folder + "GroundState_wc_%.4f_g_%.4f_NoccMap.txt" % (wc, g), N)
         # np.savetxt(write_folder + "GroundState_wc_%.4f_g_%.4f_NoccX.txt" % (wc, g), Nx)
 
-    with open(write_folder + "Main_results_wc_%.4f_Nk_%.4f.pkl" % (wc, Nk), "wb") as f:
+    with open(
+        write_folder
+        + "Main_results_wc_%.4f_Nk_%.4f_delta_%.4f.pkl" % (wc, Nk, SB_params["delta"]),
+        "wb",
+    ) as f:
         pickle.dump(main_results, f)

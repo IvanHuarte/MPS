@@ -7,7 +7,8 @@ import matplotlib.transforms as transforms
 import numpy as np
 import scipy
 
-plt.rcParams["text.usetex"] = True
+# plt.rcParams["text.usetex"] = True
+
 
 def plot_from_pickle(pickle_path, plot_field=True):
 
@@ -26,7 +27,8 @@ def plot_from_pickle(pickle_path, plot_field=True):
     w0 = int(data[:, 0][0])
     wc = int(data[:, 1][0])
     Nk = int(data[:, 2][0])
-    delta = float(data[:, 10][0])
+    print(data.shape)
+    delta = 0.1  # float(data[:, 10][0])
     gvals = data[:, 3][1::5]
 
     nprime = wc / w0
@@ -71,9 +73,11 @@ def plot_from_pickle(pickle_path, plot_field=True):
 
         for i, g in enumerate(gvals):
             Nx = np.loadtxt(
-                folder + "/GroundState_wc_%.4f_g_%.4f_delta_%.4f_NoccX.txt" % (wc, g, delta),
+                folder
+                + "/GroundState_wc_%.4f_g_%.4f_NoccX.txt" % (wc, g),
                 dtype=complex,
             ).real
+            print(f"g: {g}\nNx:{Nx}")
             Nxhalf = Nx[Nk // 2 :]
             n_values = np.arange(len(Nxhalf))
 
@@ -139,7 +143,7 @@ def plot_from_pickle(pickle_path, plot_field=True):
 
     # SPIN OBSERVABLES
     gvals = data[:, 3]
-    alphavals = data[:, 9]
+    alphavals = gvals**2 * Nk / np.pi
 
     Sz = data[:, 5]
     # Sx = data[:, 6]
@@ -158,6 +162,8 @@ def plot_from_pickle(pickle_path, plot_field=True):
 
     # ax4[0].plot(gvals, Sx, color="r", label=r"MPS")
     # ax4[1].plot(gvals, Sy, color="cyan", label=r"MPS")
+    # alphavals = data[:, 9]
+
     ax4.plot(alphavals, Sz, color="purple", ls="", marker="o", label=r"MPS")
 
     # if wc != 100:
@@ -181,53 +187,47 @@ def plot_from_pickle(pickle_path, plot_field=True):
     #         label=r"$Polaron$",
     #     )
 
-    # SUBSUBOHMIC
-    def wk_pos(k, ω0, ωc):
-        # Subsubohmic
-        wk = ω0 * ωc / np.sqrt(ω0**2 + 2 * ωc**2 * (1 - np.cos(k)))
+    # # SUBSUBOHMIC
+    # def wk_pos(k, ω0, ωc):
+    #     # Subsubohmic
+    #     wk = ω0 * ωc / np.sqrt(ω0**2 + 2 * ωc**2 * (1 - np.cos(k)))
 
-        return wk
+    #     return wk
 
-    def I3_numeric(ω0, ωc, Nk=200000):
-        k = np.linspace(0, np.pi, Nk)
-        wk = wk_pos(k, ω0, ωc)
-        return np.trapezoid(1 / wk**3, k)
+    # def I3_numeric(ω0, ωc, Nk=200000):
+    #     k = np.linspace(0, np.pi, Nk)
+    #     wk = wk_pos(k, ω0, ωc)
+    #     return np.trapezoid(1 / wk**3, k)
 
-    def deltar_lambert(delta, g0, ω0, ωc, I3):
-        # if g0 == 0:
-        #     return delta
+    # def deltar_lambert(delta, g0, ω0, ωc, I3):
+    #     # if g0 == 0:
+    #     #     return delta
 
-        A0 = 2 * g0**2 * (1 / ωc**2 + 2 / ω0**2)
-        B = (4 * g0**2 / np.pi) * I3
-        z = -B * delta * np.exp(-A0)
+    #     A0 = 2 * g0**2 * (1 / ωc**2 + 2 / ω0**2)
+    #     B = (4 * g0**2 / np.pi) * I3
+    #     z = -B * delta * np.exp(-A0)
 
-        return np.real(-(1 / B) * scipy.special.lambertw(z))
+    #     return np.real(-(1 / B) * scipy.special.lambertw(z))
 
-    B = I3_numeric(w0, wc)
-    W0 = deltar_lambert(delta, gvals, w0, wc, B)
-    Szteo = -0.5 * (1 / delta) * W0
+    # B = I3_numeric(w0, wc)
+    # W0 = deltar_lambert(delta, gvals, w0, wc, B)
+    # Szteo = -0.5 * (1 / delta) * W0
 
     # OHMIC
-<<<<<<< HEAD
-    alphavals = gvals**2 / np.pi
-    delta_r = delta * (delta / wc) ** (alphavals / (1 - alphavals))
+    # alphavals = data[:, 9]
+    # print(f"gvals : {gvals}")
+    # print(f"alphavals: {alphavals}")
+    # delta_r = delta * (delta / wc) ** (alphavals / (1 - alphavals))
+    # print(f"delta_r: {delta_r}")
+    # print(wc)
 
-    Szteo = -0.5 * delta_r / delta
+    # Szteo = -0.5 * delta_r / delta
 
-    ax4.plot(alphavals[:-1], Szteo[:-1], color="k", ls="--", label=r"$Polaron_{teo}$")
-=======
-    print(f"gvals : {gvals}")
-    alphavals = gvals**2 * Nk / np.pi
-    print(f"alphavals: {alphavals}")
-    delta_r = delta * (0.01 * delta / wc) ** (alphavals / (1 - alphavals))
-    print(f"delta_r: {delta_r}")
-    print(wc)
+    # ax4.plot(alphavals, Szteo[:], color="k", ls="--", label=r"$Polaron_{teo}$")
 
-    Szteo = -0.5 * delta_r / delta
-
-    ax4.plot(alphavals[:], Szteo[:], color="k", ls="--", label=r"$Polaron_{teo}$")
-    print(Szteo)
->>>>>>> c4036e3 (Update)
+    pol_num = np.loadtxt("/home/ihuarte/Escritorio/Ivan/MPS/Results/TFM/24de653d" + "/mzs_num_vs_alpha.txt").T
+    # print(pol_num)
+    ax4.plot(pol_num[0], pol_num[1] / 2, color="k", ls="--", label=r"$Polaron_{num}$")
     ax4.legend()
 
     # ax4[0].grid()
