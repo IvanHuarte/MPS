@@ -197,4 +197,4 @@ for delta in delta_list:
         artifact_path,
         "w",
     ) as f:
-        json.dump(sim_artifact, f)
+        json.dump(sim_artifact, f, separators=(",", ":"), sort_keys=True, indent=4)
