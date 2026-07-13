@@ -3,12 +3,12 @@ import argparse
 import json
 import os
 import pickle
+import platform
 import uuid
 from datetime import date
-import platform
-import tenpy
 
 import numpy as np
+import tenpy
 from tenpy.algorithms.dmrg import TwoSiteDMRGEngine
 
 from SpinBosonEnv.Basis import Map2Xcontraction
@@ -56,7 +56,7 @@ wc = SB_params["wc"]
 Nk = SB_params["Nk"]
 
 w_min = w0 * wc / np.sqrt(w0**2 + 4 * wc**2)
-delta_list = [0.15]#, 0.45] , 0.48, 0.49, w_min, 0.5, 0.51, 0.55, 0.7, 0.8, 0.9]
+delta_list = [0.15]  # , 0.45] , 0.48, 0.49, w_min, 0.5, 0.51, 0.55, 0.7, 0.8, 0.9]
 # delta_list = [45, 48, 49, 49.5, wc, 50.5, 51, 55]
 g_list = np.concatenate([np.arange(0.01, 2.05, 0.05)], axis=-1)
 
@@ -69,10 +69,7 @@ for delta in delta_list:
     sim_artifact["SIM"] = config
 
     if sim_setup["field"]:
-        field_paths = {
-            "map": [],
-            "x": []
-        }
+        field_paths = {"map": [], "x": []}
 
     sim_label = f"{SB_params["ohmic_model"]}_w0_{w0:.4f}_wc_{wc:.4f}_Nk_{Nk:.4f}_delta_{delta:.4f}"
 
@@ -100,11 +97,11 @@ for delta in delta_list:
         caa = CavityArrayAtom(model_params, DMRG_options)
 
         """ GROUND STATE AND ENERGY """
-        initial_state = caa.InitialState(config=[[0,1]], GS=False)
+        initial_state = caa.InitialState(config=[[0, 1]], GS=False)
         if model_params["conserve"] == "parity":
             P0 = caa.calc_mps_parity(initial_state)
             print(f"psi0 parity: {P0}")
-        
+
         eng = TwoSiteDMRGEngine(initial_state, caa, config["DMRG_options"])
         E_gr, psi_gr = eng.run()
 
@@ -138,8 +135,8 @@ for delta in delta_list:
         main_results[i][8] = Sbond
 
         if sim_setup["field"]:
-            print(f"Calculating population in bosonic field")                
-            
+            print("Calculating population in bosonic field")
+
             N = psi_gr.expectation_value(caa.OperatorChain("N"), caa.bs_idx)
             C = psi_gr.correlation_function(
                 caa.OperatorChain("Bd"), caa.OperatorChain("B"), caa.bs_idx, caa.bs_idx
@@ -148,8 +145,8 @@ for delta in delta_list:
             # print(f"N: ({type(N)})\n {N}")
             # print(f"Nx: ({type(Nx)})\n {Nx}")
 
-            Nmap_path = write_folder + "Field_" + sim_label +"_NoccMap.txt"
-            Nx_path = write_folder + "Field_" + sim_label +"_NoccX.txt"
+            Nmap_path = write_folder + "Field_" + sim_label + f"_g_{g}" + "_NoccMap.txt"
+            Nx_path = write_folder + "Field_" + sim_label + f"_g_{g}" + "_NoccX.txt"
 
             np.savetxt(
                 Nmap_path,
@@ -162,9 +159,8 @@ for delta in delta_list:
             field_paths["map"].append(Nmap_path)
             field_paths["x"].append(Nx_path)
 
-
     # Save results
-    main_results_path = write_folder + "Main_results_" + sim_label +".pkl"
+    main_results_path = write_folder + "Main_results_" + sim_label + ".pkl"
 
     with open(
         main_results_path,
@@ -173,13 +169,8 @@ for delta in delta_list:
         pickle.dump(main_results, f)
 
     # Save artifact
-    sim_artifact["results"] = {
-        "main_results": main_results_path,
-        "field": field_paths
-    }
-    sim_artifact["labels"] = {
-        "sim_label": sim_label
-    }
+    sim_artifact["results"] = {"main_results": main_results_path, "field": field_paths}
+    sim_artifact["labels"] = {"sim_label": sim_label}
     # Write metadata in main setup artifact
     metadata = {
         "uuid": sim_uuid,
@@ -190,19 +181,20 @@ for delta in delta_list:
             "numpy": np.__version__,
             "scipy": tenpy.__version__,
         },
-        "device" :{
+        "device": {
             "processor": platform.processor(),
             "machine": platform.machine(),
             "platform": platform.platform(),
-        }
+        },
     }
 
     sim_artifact["metadata"] = metadata
 
-    artifact_path = write_folder + "Simulation_results_" + sim_label + f"_UUID_{sim_uuid}.json"
+    artifact_path = (
+        write_folder + "Simulation_results_" + sim_label + f"_UUID_{sim_uuid}.json"
+    )
     with open(
         artifact_path,
-        "wb",
+        "w",
     ) as f:
         json.dump(sim_artifact, f)
-    

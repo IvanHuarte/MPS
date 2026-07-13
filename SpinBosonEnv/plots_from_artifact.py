@@ -1,12 +1,9 @@
+import json
 import os
 import pickle as pkl
 from pathlib import Path
-import json
 
-import matplotlib.pyplot as plt
-import matplotlib.transforms as transforms
 import numpy as np
-import scipy
 
 # plt.rcParams["text.usetex"] = True
 
@@ -37,5 +34,3 @@ def plot_from_artifact(artifact_path, plot_config):
 
     nprime = wc / w0
     wmin = w0 * wc / np.sqrt(w0**2 + 4 * wc**2)
-
-   
