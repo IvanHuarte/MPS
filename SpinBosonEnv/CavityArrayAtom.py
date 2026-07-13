@@ -363,9 +363,12 @@ class CavityArrayAtom:
             site.add_op(op + str(i), proj)
 
     def calc_mps_parity(self, psi):
-        Ps = psi.expectation_value(["parity"], self.atpos_idx)
-        Pb = psi.expectation_value(["parity"], self.bs_idx)
-        P_global = np.concatenate([Ps, Pb], axis=-1).prod()
+
+        term = [("parity", i) for i in range(psi.L)]
+
+        P_global = psi.expectation_value_term(term)
+
+        print(parity)
         return P_global
     
     """def state_probability(psi,ops):
