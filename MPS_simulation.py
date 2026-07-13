@@ -1,5 +1,6 @@
 #!/home/ihuarte/Escritorio/Ivan/MPS/.venv/bin/python
 import argparse
+import copy
 import json
 import os
 import pickle
@@ -33,10 +34,10 @@ if args.config is None:
 with open("/home/ihuarte/Escritorio/Ivan/MPS/config.json", "r") as f:
     config = json.load(f)
 
-sim_setup = config["sim_setup"]
-SB_params = config["SB_params"]
-model_params = config["model_params"]
-DMRG_options = config["DMRG_options"]
+sim_setup = copy.deepcopy(config["sim_setup"])
+SB_params = copy.deepcopy(config["SB_params"])
+model_params = copy.deepcopy(config["model_params"])
+DMRG_options = copy.deepcopy(config["DMRG_options"])
 
 for k, v in SB_params.items():
     SB_params[k] = np.pi if v == "pi" else v
@@ -56,9 +57,11 @@ wc = SB_params["wc"]
 Nk = SB_params["Nk"]
 
 w_min = w0 * wc / np.sqrt(w0**2 + 4 * wc**2)
-delta_list = [0.15]  # , 0.45] , 0.48, 0.49, w_min, 0.5, 0.51, 0.55, 0.7, 0.8, 0.9]
+delta_list = [0.15, 0.3, 0.45, 0.48, 0.49, w_min, 0.51, 0.55, 0.7, 0.8, 0.9]
 # delta_list = [45, 48, 49, 49.5, wc, 50.5, 51, 55]
 g_list = np.concatenate([np.arange(0.01, 2.05, 0.05)], axis=-1)
+
+g_list = [0.01]
 
 for delta in delta_list:
 
@@ -68,8 +71,7 @@ for delta in delta_list:
     sim_artifact = {}
     sim_artifact["SIM"] = config
 
-    if sim_setup["field"]:
-        field_paths = {"map": [], "x": []}
+    field_paths = {"map": [], "x": []} if sim_setup["field"] else None
 
     sim_label = f"{SB_params["ohmic_model"]}_w0_{w0:.4f}_wc_{wc:.4f}_Nk_{Nk:.4f}_delta_{delta:.4f}"
 
@@ -97,19 +99,19 @@ for delta in delta_list:
         caa = CavityArrayAtom(model_params, DMRG_options)
 
         """ GROUND STATE AND ENERGY """
-        initial_state = caa.InitialState(config=[[0, 1]], GS=False)
+        initial_state = caa.InitialState(config=model_params["pstate"], GS=False)
         if model_params["conserve"] == "parity":
             P0 = caa.calc_mps_parity(initial_state)
             print(f"psi0 parity: {P0}")
 
-        eng = TwoSiteDMRGEngine(initial_state, caa, config["DMRG_options"])
+        eng = TwoSiteDMRGEngine(initial_state, caa, DMRG_options)
         E_gr, psi_gr = eng.run()
 
         if model_params["conserve"] == "parity":
             P1 = caa.calc_mps_parity(initial_state)
             print(f"psi ground parity: {P1}")
         """ Save results """
-        # Saved as: w0 | wc | Nk | g | alpha | delta | E_gr | Sz | Sx | Sy | S_bond |
+        # Saved as: w0 | delta | wc | Nk | g | alpha | E_gr | S_bond | Sx | Sy | Sz |
 
         Sz = psi_gr.expectation_value("Sz", caa.atpos_idx)
         Sx = psi_gr.expectation_value("Sx", caa.atpos_idx)
@@ -123,16 +125,16 @@ for delta in delta_list:
         print("Entanglement_S:", Sbond, "\n\n")
 
         main_results[i][0] = SB_params["w0"]
-        main_results[i][10] = SB_params["delta"]
-        main_results[i][1] = wc
-        main_results[i][2] = Nk
-        main_results[i][3] = g
-        main_results[i][9] = env_SB.alpha
-        main_results[i][4] = E_gr
-        main_results[i][5] = Sz[0]
-        main_results[i][6] = Sx[0]
-        main_results[i][7] = Sy[0]
-        main_results[i][8] = Sbond
+        main_results[i][1] = SB_params["delta"]
+        main_results[i][2] = wc
+        main_results[i][3] = Nk
+        main_results[i][4] = g
+        main_results[i][5] = env_SB.alpha
+        main_results[i][6] = E_gr
+        main_results[i][7] = Sbond
+        main_results[i][8] = Sx[0]
+        main_results[i][9] = Sy[0]
+        main_results[i][10] = Sz[0]
 
         if sim_setup["field"]:
             print("Calculating population in bosonic field")
@@ -145,8 +147,10 @@ for delta in delta_list:
             # print(f"N: ({type(N)})\n {N}")
             # print(f"Nx: ({type(Nx)})\n {Nx}")
 
-            Nmap_path = write_folder + "Field_" + sim_label + f"_g_{g}" + "_NoccMap.txt"
-            Nx_path = write_folder + "Field_" + sim_label + f"_g_{g}" + "_NoccX.txt"
+            Nmap_path = (
+                write_folder + "Field_" + sim_label + f"_g_{g:.4f}" + "_NoccMap.txt"
+            )
+            Nx_path = write_folder + "Field_" + sim_label + f"_g_{g:.4f}" + "_NoccX.txt"
 
             np.savetxt(
                 Nmap_path,
@@ -189,7 +193,6 @@ for delta in delta_list:
     }
 
     sim_artifact["metadata"] = metadata
-
     artifact_path = (
         write_folder + "Simulation_results_" + sim_label + f"_UUID_{sim_uuid}.json"
     )

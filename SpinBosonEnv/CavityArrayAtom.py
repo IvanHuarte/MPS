@@ -7,10 +7,11 @@ from tenpy.models.model import CouplingModel
 from tenpy.networks.mps import MPS
 from tenpy.networks.site import BosonSite, GroupedSite, SpinSite, set_common_charges
 
+
 def add_parity_ops(spin, boson):
 
     P_spin = -2.0 * spin.get_op("Sz")
-    P_bosons = np.diag([(-1)**n for n in range(boson.dim)])
+    P_bosons = np.diag([(-1) ** n for n in range(boson.dim)])
 
     spin.add_op("parity", P_spin)
     boson.add_op("parity", P_bosons)
@@ -61,7 +62,6 @@ class CavityArrayAtom:
         self.add_projectors(self.bs)
         self.add_projectors(self.sp)
 
-        
         if self.GS:
             self.gs = GroupedSite(
                 [self.bs, self.sp], labels=None, charges="independent"
@@ -365,12 +365,9 @@ class CavityArrayAtom:
     def calc_mps_parity(self, psi):
 
         term = [("parity", i) for i in range(psi.L)]
-
         P_global = psi.expectation_value_term(term)
-
-        print(parity)
         return P_global
-    
+
     """def state_probability(psi,ops):
         
         psi.apply_local_op(0, proj, unitary=True)

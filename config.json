@@ -22,7 +22,8 @@
         "bc_mps":"finite",
         "bc":"open",
         "plot_lattice": false,
-        "conserve": "parity"
+        "conserve": "parity",
+        "pstate": [[1, 0]]
     },
 
     "DMRG_options":{

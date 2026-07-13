@@ -73,8 +73,7 @@ def plot_from_pickle(pickle_path, plot_field=True):
 
         for i, g in enumerate(gvals):
             Nx = np.loadtxt(
-                folder
-                + "/GroundState_wc_%.4f_g_%.4f_NoccX.txt" % (wc, g),
+                folder + "/GroundState_wc_%.4f_g_%.4f_NoccX.txt" % (wc, g),
                 dtype=complex,
             ).real
             print(f"g: {g}\nNx:{Nx}")
@@ -225,7 +224,10 @@ def plot_from_pickle(pickle_path, plot_field=True):
 
     # ax4.plot(alphavals, Szteo[:], color="k", ls="--", label=r"$Polaron_{teo}$")
 
-    pol_num = np.loadtxt("/home/ihuarte/Escritorio/Ivan/MPS/Results/TFM/24de653d" + "/mzs_num_vs_alpha.txt").T
+    pol_num = np.loadtxt(
+        "/home/ihuarte/Escritorio/Ivan/MPS/Results/TFM/24de653d"
+        + "/mzs_num_vs_alpha.txt"
+    ).T
     # print(pol_num)
     ax4.plot(pol_num[0], pol_num[1] / 2, color="k", ls="--", label=r"$Polaron_{num}$")
     ax4.legend()

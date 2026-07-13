@@ -17,10 +17,13 @@ def plot_from_artifact(artifact_path, plot_config):
     write_folder = folder + "/" + new_folder + "/"
     os.makedirs(write_folder, exist_ok=True)
 
+    results_path = artifact["results"]["main_results"]
     # Load Main results .pkl
-    with open(artifact_path, "rb") as f:
+    with open(results_path, "rb") as f:
         data = pkl.load(f)
-    # Saved as: w0 | wc | Nk | g | E_gr | Sx | Sy | Sz | S_bond | alpha | delta
+
+    # Saved as: w0 | wc | Nk | g | alpha | delta | E_gr | Sz | Sx | Sy | S_bond |
+    # ENERGY VS. COUPLING
 
     # OCUPPATION VS SITES
 
