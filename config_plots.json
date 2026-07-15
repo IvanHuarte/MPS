@@ -4,17 +4,53 @@
         "output_format": "pdf"
 
     },
-    "occupationVSsites":{
-        "on": true,
-        "first": 0,
-        "interval": 1, 
-        "plot_theo": true,
-        "use_alpha": true
+    
+    "single":{
+        "on": false,
 
+        "energyVScoupling":{
+            "on": true,
+            "use_alpha": true
+        },
+        "occupationVSsites":{
+            "on": true,
+            "first": 0,
+            "interval": 1, 
+            "plot_theo": true,
+            "use_alpha": true
+
+        },
+        "spinobsVScoupling":{
+            "sx":true,
+            "sy":true,
+            "sz":true
+
+        }
     },
-
-    "energyVScoupling":{
+    "crossed":{
         "on": true,
-        "use_alpha": true
+        "mode": "parity",
+
+        "crossed_energyVScoupling":{
+            "on": true,
+            "use_alpha": true
+        },
+
+        "crossed_occupationVSsites":{
+            "on": true,
+            "first": 0,
+            "interval": 1, 
+            "plot_theo": true,
+            "use_alpha": true
+
+        },
+        "crossed_spinobsVScoupling":{
+            "sx":true,
+            "sy":true,
+            "sz":true
+
+        }
+
     }
+    
 }

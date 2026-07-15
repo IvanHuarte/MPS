@@ -3,7 +3,11 @@ import os
 import pickle as pkl
 from pathlib import Path
 
-# plt.rcParams["text.usetex"] = True
+from SpinBosonEnv.plots.Energy import energyVScoupling
+from SpinBosonEnv.plots.Entropy import entropyVScoupling
+from SpinBosonEnv.plots.Occupation import occupationVSsites
+from SpinBosonEnv.plots.Spin import sxVScoupling, syVScoupling, szVScoupling
+from SpinBosonEnv.toolbox import classify, print_tree
 
 
 def plot_from_artifact(artifact_path, plot_config):
@@ -23,8 +27,105 @@ def plot_from_artifact(artifact_path, plot_config):
         data = pkl.load(f)
 
     # Saved as: w0 | wc | Nk | g | alpha | delta | E_gr | Sz | Sx | Sy | S_bond |
-    # ENERGY VS. COUPLING
 
     # OCUPPATION VS SITES
+    if plot_config["occupationVSsites"]["on"]:
+        occupationVSsites(
+            data,
+            artifact,
+            plot_config["occupationVSsites"],
+            write_folder,
+            **plot_config["MACROS"],
+        )
 
-    # wmin = w0 * wc / np.sqrt(w0**2 + 4 * wc**2)
+    # ENERGY VS. COUPLING
+    if plot_config["energyVScoupling"]["on"]:
+        energyVScoupling(
+            data,
+            artifact,
+            plot_config["energyVScoupling"],
+            write_folder,
+            **plot_config["MACROS"],
+        )
+
+    # ENTROPY VS. COUPLING
+    if plot_config["entropyVScoupling"]["on"]:
+        entropyVScoupling(
+            data,
+            artifact,
+            plot_config["entropyVScoupling"],
+            write_folder,
+            **plot_config["MACROS"],
+        )
+
+    # SPIN OBSERVABLES VS. COUPLING
+    if plot_config["spinobsVScoupling"]["sx"]:
+        sxVScoupling(
+            data,
+            artifact,
+            plot_config["spinobsVScoupling"],
+            write_folder,
+            **plot_config["MACROS"],
+        )
+    if plot_config["spinobsVScoupling"]["sy"]:
+        syVScoupling(
+            data,
+            artifact,
+            plot_config["spinobsVScoupling"],
+            write_folder,
+            **plot_config["MACROS"],
+        )
+    if plot_config["spinobsVScoupling"]["sz"]:
+        szVScoupling(
+            data,
+            artifact,
+            plot_config["spinobsVScoupling"],
+            write_folder,
+            **plot_config["MACROS"],
+        )
+
+
+def plot_artifact_batch(artifact_paths, plot_config, static_args, mode, folder):
+
+    new_folder = "Figures_"
+    for args in static_args:
+        new_folder += f"_{args[0]}_{args[1]}"
+    write_folder = folder + "/" + new_folder + "/"
+    os.makedirs(folder, exist_ok=True)
+
+    results_path = artifact["results"]["main_results"]
+    # Load Main results .pkl
+    with open(results_path, "rb") as f:
+        data = pkl.load(f)
+
+
+def recursive_plots(grouped_paths, mode, plot_config, folder, static_through_plots=[]):
+
+    mode, remaining_modes = mode.split("/", 1)
+
+    for k, v in grouped_paths.items():
+
+        if isinstance(v, dict):
+            recursive_plots(
+                grouped_paths[k],
+                remaining_modes,
+                plot_config,
+                folder,
+                static_through_plots=static_through_plots.append((mode, k)),
+            )
+
+        elif isinstance(v[0], list):
+            plot_artifact_batch(
+                grouped_paths[k], plot_config, static_through_plots, mode, folder
+            )
+
+
+def crossed_artifact_plots(artifact_paths, plot_config, folder):
+
+    mode = plot_config["mode"]
+
+    grouped_paths = classify(artifact_paths, mode)
+
+    print_tree(grouped_paths)
+
+    recursive_plots(grouped_paths, mode, plot_config, folder)

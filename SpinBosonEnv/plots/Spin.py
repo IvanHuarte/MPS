@@ -11,6 +11,9 @@ def calc_sz_teo(x_data, ohmic_model, w0, wc, delta):
     if ohmic_model == "Ohmic":
         return sz_ohmic(x_data, wc, delta)
 
+    else:
+        raise ValueError(f"No such ohmic model: {ohmic_model}")
+
 
 def sxVScoupling(data, artifact, plot_setup, write_folder, output_format="png"):
 
@@ -82,7 +85,7 @@ def szVScoupling(data, artifact, plot_setup, write_folder, output_format="png"):
     if plot_setup["plot_theo"]:
         ohmic_model = artifact["SIM"]["SB_params"]
         Sz_teo = calc_sz_teo(ohmic_model, w0, wc, delta)
-        ax.plot(alphavals, Sz_teo, color="purple", label=r"$Polaron_{teo}$")
+        ax.plot(x_data, Sz_teo, color="purple", label=r"$Polaron_{teo}$")
         ax.plot(x_data, Sz, color="purple", ls="", marker="o", ms=2, label=r"MPS")
         ax.grid()
         ax.legend()

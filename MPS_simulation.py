@@ -45,9 +45,7 @@ for k, v in SB_params.items():
 
 # Create simulation folder
 sim_uuid = str(uuid.uuid4())[:8]
-write_folder = (
-    f"/home/ihuarte/Escritorio/Ivan/MPS/Results/{SB_params["ohmic_model"]}/{sim_uuid}/"
-)
+write_folder = f"/home/ihuarte/Escritorio/Ivan/MPS/Results_parity/{SB_params["ohmic_model"]}/{sim_uuid}/"
 os.makedirs(write_folder, exist_ok=True)
 
 
@@ -61,7 +59,6 @@ delta_list = [0.15, 0.3, 0.45, 0.48, 0.49, w_min, 0.51, 0.55, 0.7, 0.8, 0.9]
 # delta_list = [45, 48, 49, 49.5, wc, 50.5, 51, 55]
 g_list = np.concatenate([np.arange(0.01, 2.05, 0.05)], axis=-1)
 
-g_list = [0.01]
 
 for delta in delta_list:
 
