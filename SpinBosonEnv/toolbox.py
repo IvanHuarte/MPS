@@ -52,14 +52,27 @@ def get_value(path, criterion):
 def group_by(paths, criterion):
     """
     Agrupa una lista de archivos según criterion.
+
+    criterion puede ser:
+        "wc"
+        "parity"
+        "delta-parity"
+        "w0-wc-Nk"
     """
 
     groups = defaultdict(list)
 
-    for path in paths:
-        groups[get_value(path, criterion)].append(path)
+    criteria = criterion.split("-")
 
-    # Ordenar las claves cuando sea posible
+    for path in paths:
+
+        if len(criteria) == 1:
+            key = get_value(path, criteria[0])
+        else:
+            key = tuple(get_value(path, c) for c in criteria)
+
+        groups[key].append(path)
+
     try:
         keys = sorted(groups)
     except TypeError:
@@ -100,3 +113,29 @@ def print_tree(tree, prefix="", values=True):
                 print(prefix + f"{str(key)}: {str(val)}")
             else:
                 print(prefix + str(key))
+
+
+# ------------- PLOTTING -------------- #
+
+param2latex = {
+    "w0": r"\omega_0",
+    "wc": r"\omega_c",
+    "delta": r"\Delta",
+    "parity": r"P",
+    "Nk": r"N_k"
+
+}
+
+def join_modes(modes, values):
+
+    assert len(modes) == len(values)
+    values = [f"{v:g}" if not isinstance(v, str) else v for v in values]
+    equals = [rf"{param2latex[m]}\;=\;{v}"  for m, v in zip(modes, values)]
+    return r"\;\;".join(equals)
+
+def join_static_modes(static_modes):
+
+    static_modes = [(m, f"{v:g}") if not isinstance(v, str) else (m,v) for m, v in static_modes]
+    equals = [rf"${param2latex[m]}\;=\;{v}$"  for m, v in static_modes]
+    return "\n".join(equals)
+    

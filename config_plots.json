@@ -1,13 +1,13 @@
 {
 
-    "MACROS":{
-        "output_format": "pdf"
 
-    },
     
     "single":{
         "on": false,
+        "MACROS":{
+            "output_format": "pdf"
 
+        },
         "energyVScoupling":{
             "on": true,
             "use_alpha": true
@@ -29,19 +29,29 @@
     },
     "crossed":{
         "on": true,
-        "mode": "parity",
+        "mode": "wc/delta/parity",
+        "MACROS":{
+            "output_format": "png"
+        },
 
         "crossed_energyVScoupling":{
             "on": true,
-            "use_alpha": true
+            "use_alpha": false,
+            
+            "cmap": "inferno",
+            "x_lims": null,
+            "y_lims": null
         },
 
         "crossed_occupationVSsites":{
             "on": true,
-            "first": 0,
-            "interval": 1, 
+            "coupling_indexes": [0,5,10],
             "plot_theo": true,
-            "use_alpha": true
+            "use_alpha": true,
+            
+            "cmap": "inferno",
+            "x_lims": null,
+            "y_lims": null
 
         },
         "crossed_spinobsVScoupling":{
