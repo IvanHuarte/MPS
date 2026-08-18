@@ -144,9 +144,9 @@ def crossed_occupationVSsites(
     ax.set_yscale("log")
     ax.set_xscale("log")
     ax.grid()
-    fig1.savefig(
+    fig.savefig(
         write_folder + f"Nx_RealSpace_occupation_{sim_label}.{output_format}",
         dpi=600,
         bbox_inches="tight",
     )
-    plt.close(fig1)
+    plt.close(fig)
