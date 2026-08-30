@@ -1,20 +1,20 @@
 import json
 import re
 from collections import defaultdict
-from functools import lru_cache
+from functools import cache
 from pathlib import Path
 
 # ---------- Lectura de información ----------
 
 
-@lru_cache(maxsize=None)
+@cache
 def load_artifact(path):
     """Carga el json una única vez."""
     with open(path) as f:
         return json.load(f)
 
 
-@lru_cache(maxsize=None)
+@cache
 def get_params(path):
     """Extrae los parámetros del nombre del archivo."""
     stem = Path(path).stem
@@ -110,7 +110,7 @@ def print_tree(tree, prefix="", values=True):
             print_tree(val, prefix + "   ", values=values)
         else:
             if values:
-                print(prefix + f"{str(key)}: {str(val)}")
+                print(prefix + f"{key!s}: {val!s}")
             else:
                 print(prefix + str(key))
 
@@ -122,20 +122,22 @@ param2latex = {
     "wc": r"\omega_c",
     "delta": r"\Delta",
     "parity": r"P",
-    "Nk": r"N_k"
-
+    "Nk": r"N_k",
 }
+
 
 def join_modes(modes, values):
 
     assert len(modes) == len(values)
     values = [f"{v:g}" if not isinstance(v, str) else v for v in values]
-    equals = [rf"{param2latex[m]}\;=\;{v}"  for m, v in zip(modes, values)]
+    equals = [rf"{param2latex[m]}\;=\;{v}" for m, v in zip(modes, values)]
     return r"\;\;".join(equals)
+
 
 def join_static_modes(static_modes):
 
-    static_modes = [(m, f"{v:g}") if not isinstance(v, str) else (m,v) for m, v in static_modes]
-    equals = [rf"${param2latex[m]}\;=\;{v}$"  for m, v in static_modes]
+    static_modes = [
+        (m, f"{v:g}") if not isinstance(v, str) else (m, v) for m, v in static_modes
+    ]
+    equals = [rf"${param2latex[m]}\;=\;{v}$" for m, v in static_modes]
     return "\n".join(equals)
-    

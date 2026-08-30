@@ -1,13 +1,16 @@
 {
+    "write_folder": "/home/ihuarte/Escritorio/Ivan/MPS/Dynamics/",
+
     "sim_setup":{
-        "field": true
+        "field": true,
+        "field_each": 1
     },
 
     "SB_params": {
         "ohmic_model": "SubSubOhmic",
         "wc": 50,
         "w0": 1.0,
-        "Nk" : 501,
+        "Nk" : 101,
         "g" : null,
         "delta" : null
     },
@@ -33,5 +36,14 @@
             "chi_max": 100, 
             "svd_min": 1e-12
         }
-}
+    },
+
+    "TEBD_options":{
+        "N_steps": 1,
+        "dt": 0.5,
+        "order": 4,
+        "trunc_params": {"chi_max": 100, "svd_min": 1e-12},
+        "Tmax": 3,
+        "preserve_norm": true
+    }
 }

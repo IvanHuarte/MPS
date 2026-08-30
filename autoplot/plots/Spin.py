@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-from SpinBosonEnv.plots.Theory import sz_ohmic, sz_subsubohmic
+from autoplot.plots.Theory import sz_ohmic, sz_subsubohmic
 
 
 def calc_sz_teo(x_data, ohmic_model, w0, wc, delta):

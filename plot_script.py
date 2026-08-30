@@ -5,7 +5,7 @@ import glob
 import json
 from pathlib import Path
 
-from SpinBosonEnv.plots_from_artifact import crossed_artifact_plots, plot_from_artifact
+from autoplot.plots_from_artifact import crossed_artifact_plots, plot_from_artifact
 
 parser = argparse.ArgumentParser()
 parser.add_argument(

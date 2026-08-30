@@ -292,25 +292,8 @@ class CavityArrayAtom:
 
         return eng.run()
 
-    def measurement(self, eng, data):
-
-        if data is None:
-            keys = ["t", "EXC", "N", "trunc_err"]
-            data = dict([(k, []) for k in keys])
-
-        data["t"].append(eng.evolved_time)
-        Pes = eng.psi.expectation_value("Sz1", self.atpos_idx) + 0.5
-        data["EXC"].append(Pes)
-        data["N"].append(eng.psi.expectation_value(self.OperatorChain("N")))
-
-        data["trunc_err"].append(eng.trunc_err.eps)
-
-        print("t: ", eng.evolved_time)
-        print(Pes, "\n")
-
-        return data
-
-    def measure_projector(self, eng, data, field=False):
+    
+    def measure_projector(self, eng, field=None):
         if data is None:
             keys = ["t", "EXC", "N"]
             data = dict([(k, []) for k in keys])

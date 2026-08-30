@@ -58,7 +58,7 @@ w_min = w0 * wc / np.sqrt(w0**2 + 4 * wc**2)
 delta_list = [0.15, 0.3, 0.45, 0.48, 0.49, w_min, 0.51, 0.55, 0.7, 0.8, 0.9]
 # delta_list = [45, 48, 49, 49.5, wc, 50.5, 51, 55]
 g_list = np.concatenate([np.arange(0.01, 2.05, 0.05)], axis=-1)
-
+delta_list = [0.6]
 
 for delta in delta_list:
 
@@ -110,9 +110,9 @@ for delta in delta_list:
         """ Save results """
         # Saved as: w0 | delta | wc | Nk | g | alpha | E_gr | S_bond | Sx | Sy | Sz |
 
-        Sz = psi_gr.expectation_value("Sz", caa.atpos_idx)
-        Sx = psi_gr.expectation_value("Sx", caa.atpos_idx)
-        Sy = psi_gr.expectation_value("Sy", caa.atpos_idx)
+        Sz = psi_gr.expectation_value("Sz", caa.atpos_idx)[0]
+        Sx = psi_gr.expectation_value("Sx", caa.atpos_idx)[0]
+        Sy = psi_gr.expectation_value("Sy", caa.atpos_idx)[0]
         Sbond = psi_gr.entanglement_entropy(n=1)[0]
 
         print("E_gr:%.2f " % E_gr)
@@ -129,9 +129,9 @@ for delta in delta_list:
         main_results[i][5] = env_SB.alpha
         main_results[i][6] = E_gr
         main_results[i][7] = Sbond
-        main_results[i][8] = Sx[0]
-        main_results[i][9] = Sy[0]
-        main_results[i][10] = Sz[0]
+        main_results[i][8] = Sx
+        main_results[i][9] = Sy
+        main_results[i][10] = Sz
 
         if sim_setup["field"]:
             print("Calculating population in bosonic field")
