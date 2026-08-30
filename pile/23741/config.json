@@ -26,7 +26,7 @@
         "bc":"open",
         "plot_lattice": false,
         "conserve": "parity",
-        "pstate": [[0, 1]]
+        "pstate": [[1, 0]]
     },
 
     "DMRG_options":{

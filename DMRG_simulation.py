@@ -43,9 +43,10 @@ for k, v in SB_params.items():
     SB_params[k] = np.pi if v == "pi" else v
 
 
+write_folder = config["write_folder"]
 # Create simulation folder
 sim_uuid = str(uuid.uuid4())[:8]
-write_folder = f"/home/ihuarte/Escritorio/Ivan/MPS/Results_parity/{SB_params["ohmic_model"]}/{sim_uuid}/"
+write_folder = write_folder + f"{SB_params["ohmic_model"]}/{sim_uuid}/"
 os.makedirs(write_folder, exist_ok=True)
 
 
@@ -55,10 +56,9 @@ wc = SB_params["wc"]
 Nk = SB_params["Nk"]
 
 w_min = w0 * wc / np.sqrt(w0**2 + 4 * wc**2)
-delta_list = [0.15, 0.3, 0.45, 0.48, 0.49, w_min, 0.51, 0.55, 0.7, 0.8, 0.9]
-# delta_list = [45, 48, 49, 49.5, wc, 50.5, 51, 55]
+# delta_list = [0.15, 0.3, 0.45, 0.48, 0.49, w_min, 0.51, 0.55, 0.7, 0.8, 0.9]
+delta_list = [45, 48, 49, 49.5, wc, 50.5, 51, 55]
 g_list = np.concatenate([np.arange(0.01, 2.05, 0.05)], axis=-1)
-delta_list = [0.6]
 
 for delta in delta_list:
 

@@ -41,3 +41,17 @@ def SubSubOhmicModel(Nk, wc, g, **kwargs):
     alpha = 2 * g**2
 
     return (k, wk, gk, alpha)
+
+def SubSubOhmic32Model(Nk, wc, g, **kwargs):
+
+    w0 = kwargs["w0"]
+
+    k = np.linspace(-np.pi, np.pi, Nk)
+    wk = w0 * wc / np.sqrt(w0**2 + 2 * wc**2 * (1 - np.cos(k)))
+
+    gk = g * (wk/w0)**(3/2) / np.sqrt(Nk)
+    gk = np.broadcast_to(gk, (Nk,))
+
+    alpha = 2 * g**2
+
+    return (k, wk, gk, alpha)
