@@ -56,12 +56,12 @@ wc = SB_params["wc"]
 Nk = SB_params["Nk"]
 
 w_min = w0 * wc / np.sqrt(w0**2 + 4 * wc**2)
-delta_list = [0.15, 0.3, 0.45, 0.48, 0.49, w_min, 0.51, 0.55, 0.7, 0.8, 0.9]
+# delta_list = [0.15, 0.3, 0.45, 0.48, 0.49, w_min, 0.51, 0.55, 0.7, 0.8, 0.9]
 # delta_list = [45, 48, 49, 49.5, wc, 50.5, 51, 55]
-g_list = np.concatenate([np.arange(0.01, 2.05, 0.05)], axis=-1)
+# g_list = np.concatenate([np.arange(0.01, 2.05, 0.05)], axis=-1)
 
-g_list = [0.3, 0.4]
-delta_list = [25.0]
+g_list = [0.1, 0.5, 0.9]
+delta_list = [0.2, 1.0, 2.1]
 
 
 for delta in delta_list:
@@ -121,8 +121,9 @@ for delta in delta_list:
         observables_save = measurement_TEBD_observables(eng_TEBD, observables_save)
         fields_save = measurement_TEBD_field(eng_TEBD, fields_save, env_SB.basis)
 
-
+        step = 0
         while eng_TEBD.evolved_time < Tmax:
+            step += 1
             eng_TEBD.run()
 
             observables_save = measurement_TEBD_observables(eng_TEBD, observables_save)
@@ -131,7 +132,7 @@ for delta in delta_list:
             print("Sz: ", observables_save["Sz"][-1])
             print('trunc_error: ',observables_save["trunc_error"][-1])
 
-            if sim_setup["field"]:
+            if sim_setup["field"] and step % sim_setup["field_each"] == 0:
                 print("Calculating population in bosonic field")
                 fields_save = measurement_TEBD_field(eng_TEBD, fields_save, env_SB.basis)           
 

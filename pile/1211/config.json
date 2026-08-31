@@ -1,16 +1,16 @@
 {
-    "write_folder": "/home/ihuarte/Escritorio/Ivan/MPS/Results_parity/",
+    "write_folder": "/home/ihuarte/Escritorio/Ivan/MPS/Dynamics/",
 
     "sim_setup":{
         "field": true,
-        "field_each": 1
+        "field_each": 10
     },
 
     "SB_params": {
-        "ohmic_model": "SubSubOhmic",
-        "wc": 50,
+        "ohmic_model": "SubSubOhmic32",
+        "wc": 2.0,
         "w0": 1.0,
-        "Nk" : 501,
+        "Nk" : 201,
         "g" : null,
         "delta" : null
     },
@@ -26,11 +26,11 @@
         "bc":"open",
         "plot_lattice": false,
         "conserve": "parity",
-        "pstate": [[0, 1]]
+        "pstate": [[1, 0]]
     },
 
     "DMRG_options":{
-        "min_sweeps":5,
+        "min_sweeps":10,
         "max_sweeps":50,
         "trunc_params": {
             "chi_max": 100, 
@@ -40,10 +40,10 @@
 
     "TEBD_options":{
         "N_steps": 1,
-        "dt": 0.5,
+        "dt": 0.1,
         "order": 4,
         "trunc_params": {"chi_max": 100, "svd_min": 1e-12},
-        "Tmax": 3,
+        "Tmax": 1.0,
         "preserve_norm": true
     }
 }
