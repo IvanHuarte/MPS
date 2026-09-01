@@ -14,8 +14,10 @@ from tenpy.algorithms.tebd import TEBDEngine
 
 from SpinBosonEnv.CavityArrayAtom import CavityArrayAtom
 from SpinBosonEnv.GeneralSpinBosonEnv import GeneralSpinBosonEnv
-
-from SpinBosonEnv.measurement import measurement_TEBD_observables, measurement_TEBD_field
+from SpinBosonEnv.measurement import (
+    measurement_TEBD_field,
+    measurement_TEBD_observables,
+)
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -46,7 +48,7 @@ for k, v in SB_params.items():
 write_folder = config["write_folder"]
 # Create simulation folder
 sim_uuid = str(uuid.uuid4())[:8]
-write_folder = write_folder + f"{SB_params["ohmic_model"]}/{sim_uuid}/"
+write_folder = write_folder + f"{SB_params["ohmic_model"]}/UUID_{sim_uuid}/"
 os.makedirs(write_folder, exist_ok=True)
 
 
@@ -77,7 +79,9 @@ for delta in delta_list:
         sim_label = f"{SB_params["ohmic_model"]}_w0_{w0:.4f}_wc_{wc:.4f}_Nk_{Nk:.4f}_delta_{delta:.4f}_g_{g:.4f}"
 
         print("\n************************ TEBD SIMULATION *************************")
-        print(f"w0: {SB_params["w0"]:.2f}  wc: {wc:.2f}  Nk: {SB_params["Nk"]} g: {g:.2f}")
+        print(
+            f"w0: {SB_params["w0"]:.2f}  wc: {wc:.2f}  Nk: {SB_params["Nk"]} g: {g:.2f}"
+        )
         print(f"delta: {SB_params["delta"]:.2f} Boson_dim: {model_params["N_max"]}")
         print("********************************************************************")
 
@@ -102,14 +106,14 @@ for delta in delta_list:
 
         eng_TEBD = TEBDEngine(initial_state, caa, TEBD_options)
 
-        Tmax = TEBD_options['Tmax']
-        dt = TEBD_options['dt']
+        Tmax = TEBD_options["Tmax"]
+        dt = TEBD_options["dt"]
         n_time_steps = int(Tmax / dt + 1)
 
         # Observables saved as: t | truncation_error | E | S_bond | parity | Sx | Sy | Sz |
         # Field saved as: t | Nx
 
-        observables =  ["t", "trunc_error", "E", "S_bond", "parity", "Sx", "Sy", "Sz"]
+        observables = ["t", "trunc_error", "E", "S_bond", "parity", "Sx", "Sy", "Sz"]
         fields = ["t", "Nx"]
 
         observables_save = dict([(k, []) for k in observables])
@@ -128,15 +132,16 @@ for delta in delta_list:
 
             observables_save = measurement_TEBD_observables(eng_TEBD, observables_save)
 
-            print('t: ',eng_TEBD.evolved_time)
+            print("t: ", eng_TEBD.evolved_time)
             print("Sz: ", observables_save["Sz"][-1])
-            print('trunc_error: ',observables_save["trunc_error"][-1])
+            print("trunc_error: ", observables_save["trunc_error"][-1])
 
             if sim_setup["field"] and step % sim_setup["field_each"] == 0:
                 print("Calculating population in bosonic field")
-                fields_save = measurement_TEBD_field(eng_TEBD, fields_save, env_SB.basis)           
+                fields_save = measurement_TEBD_field(
+                    eng_TEBD, fields_save, env_SB.basis
+                )
 
-        
         # Set MAIN PARAMS to simulation artifact
         sim_artifact["SIM"]["SB_params"]["w0"] = SB_params["w0"]
         sim_artifact["SIM"]["SB_params"]["delta"] = SB_params["delta"]
@@ -153,7 +158,7 @@ for delta in delta_list:
         ) as f:
             pickle.dump(observables_save, f)
 
-        # Save FIELD occupation over time         
+        # Save FIELD occupation over time
         Nx_path = write_folder + "Field_over_time_" + sim_label + "_NoccX.pkl"
         with open(
             Nx_path,
@@ -163,7 +168,10 @@ for delta in delta_list:
         field_paths["x"].append(Nx_path)
 
         # Save artifact
-        sim_artifact["results"] = {"observables": observables_path, "field": field_paths}
+        sim_artifact["results"] = {
+            "observables": observables_path,
+            "field": field_paths,
+        }
         sim_artifact["labels"] = {"sim_label": sim_label}
         # Write metadata in main setup artifact
         metadata = {
