@@ -62,9 +62,10 @@ w_min = w0 * wc / np.sqrt(w0**2 + 4 * wc**2)
 # delta_list = [45, 48, 49, 49.5, wc, 50.5, 51, 55]
 # g_list = np.concatenate([np.arange(0.01, 2.05, 0.05)], axis=-1)
 
-g_list = [0.1, 0.5, 0.9]
+g_list = [0.1, 0.3, 0.5, 0.7, 0.9]
 delta_list = [0.2, 1.0, 2.1]
 
+field_each = sim_setup["field_each"]
 
 for delta in delta_list:
 
@@ -106,6 +107,7 @@ for delta in delta_list:
 
         eng_TEBD = TEBDEngine(initial_state, caa, TEBD_options)
 
+        print(eng_TEBD.options)
         Tmax = TEBD_options["Tmax"]
         dt = TEBD_options["dt"]
         n_time_steps = int(Tmax / dt + 1)
@@ -113,7 +115,7 @@ for delta in delta_list:
         # Observables saved as: t | truncation_error | E | S_bond | parity | Sx | Sy | Sz |
         # Field saved as: t | Nx
 
-        observables = ["t", "trunc_error", "E", "S_bond", "parity", "Sx", "Sy", "Sz"]
+        observables = ["t", "trunc_error", "E", "S_bond", "Sx", "Sy", "Sz"]
         fields = ["t", "Nx"]
 
         observables_save = dict([(k, []) for k in observables])
@@ -136,11 +138,12 @@ for delta in delta_list:
             print("Sz: ", observables_save["Sz"][-1])
             print("trunc_error: ", observables_save["trunc_error"][-1])
 
-            if sim_setup["field"] and step % sim_setup["field_each"] == 0:
+            if sim_setup["field"] and step % field_each == 0:
                 print("Calculating population in bosonic field")
                 fields_save = measurement_TEBD_field(
                     eng_TEBD, fields_save, env_SB.basis
                 )
+                field_each *= 10
 
         # Set MAIN PARAMS to simulation artifact
         sim_artifact["SIM"]["SB_params"]["w0"] = SB_params["w0"]

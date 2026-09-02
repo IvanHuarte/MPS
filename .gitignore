@@ -22,7 +22,7 @@ uv.lock
 main.py
 
 # Cosas que no quiero compartir
-
+pile/
 Results/
 Results*/
 Old_scripts/
