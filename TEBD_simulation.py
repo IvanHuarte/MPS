@@ -132,13 +132,15 @@ for delta in delta_list:
             step += 1
             eng_TEBD.run()
 
-            observables_save = measurement_TEBD_observables(eng_TEBD, observables_save)
+            # observables_save = measurement_TEBD_observables(eng_TEBD, observables_save)
 
             print("t: ", eng_TEBD.evolved_time)
-            print("Sz: ", observables_save["Sz"][-1])
-            print("trunc_error: ", observables_save["trunc_error"][-1])
+            # print("Sz: ", observables_save["Sz"][-1])
+            # print("trunc_error: ", observables_save["trunc_error"][-1])
 
             if sim_setup["field"] and step % field_each == 0:
+                observables_save = measurement_TEBD_observables(eng_TEBD, observables_save)
+                print("Sz: ", observables_save["Sz"][-1])
                 print("Calculating population in bosonic field")
                 fields_save = measurement_TEBD_field(
                     eng_TEBD, fields_save, env_SB.basis
