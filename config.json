@@ -1,5 +1,5 @@
 {
-    "write_folder": "/home/ihuarte/Escritorio/Ivan/MPS/Results/LightCone/",
+    "write_folder": "/home/ihuarte/Escritorio/Ivan/MPS/Static32/Even/",
 
     "sim_setup":{
         "field": true,
@@ -8,9 +8,9 @@
 
     "SB_params": {
         "ohmic_model": "SubSubOhmic32",
-        "wc": 2.0,
+        "wc": 50.0,
         "w0": 1.0,
-        "Nk" : 301,
+        "Nk" : 401,
         "g" : null,
         "delta" : null
     },

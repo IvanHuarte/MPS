@@ -17,8 +17,8 @@ venv/
 *.log
 
 # UV
-pyproject.toml
-uv.lock
+# pyproject.toml
+# uv.lock
 main.py
 
 # Cosas que no quiero compartir

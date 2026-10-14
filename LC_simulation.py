@@ -105,10 +105,12 @@ for delta in delta_list:
         """ INITIAL STATE PREPARATION """
 
         caa = CavityArrayAtom(model_params, DMRG_options=None)
-        spin_up = [[1, 0]]
-        spin_down = [[0, 1]]
-        # initial_state = caa.InitialState(config=config_up, GS=False)
+        spin_up = [[0, 1]]
+        spin_down = [[1, 0]]
+        # tebd_initial_state = caa.InitialState(config=spin_up, GS=False)
+        # print(f"Initial Sz: {tebd_initial_state.expectation_value("Sz", 0)}")
         dmrg_init_state = caa.InitialState(config=spin_down, GS=False)
+        
         E, dmrg_ground_state = TwoSiteDMRGEngine(
             dmrg_init_state, caa, DMRG_options
         ).run()
